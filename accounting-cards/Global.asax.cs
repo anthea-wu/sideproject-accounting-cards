@@ -15,9 +15,6 @@ namespace accounting_cards
         {
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebConfig.Register);
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
     }
 }

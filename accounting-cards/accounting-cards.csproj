@@ -119,9 +119,6 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="App_Start\BundleConfig.cs" />
-        <Compile Include="App_Start\FilterConfig.cs" />
-        <Compile Include="App_Start\RouteConfig.cs" />
         <Compile Include="App_Start\WebConfig.cs" />
         <Compile Include="Controllers\HomeController.cs" />
         <Compile Include="Global.asax.cs">
@@ -132,6 +129,7 @@
     <ItemGroup>
         <Content Include="favicon.ico" />
         <Content Include="Global.asax" />
+        <Content Include="index.html" />
         <Content Include="Web.config" />
         <Content Include="Web.Debug.config">
             <DependentUpon>Web.config</DependentUpon>
@@ -162,9 +160,9 @@
                 <WebProjectProperties>
                     <UseIIS>True</UseIIS>
                     <AutoAssignPort>True</AutoAssignPort>
-                    <DevelopmentServerPort>5000</DevelopmentServerPort>
+                    <DevelopmentServerPort>6789</DevelopmentServerPort>
                     <DevelopmentServerVPath>/</DevelopmentServerVPath>
-                    <IISUrl>http://localhost:5000/</IISUrl>
+                    <IISUrl>http://localhost:6789/index.html</IISUrl>
                     <NTLMAuthentication>False</NTLMAuthentication>
                     <UseCustomServer>False</UseCustomServer>
                     <CustomServerUrl />
