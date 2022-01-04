@@ -6,7 +6,8 @@
 
     <link rel="icon" href="https://emojis.slackmojis.com/emojis/images/1620064224/35256/owo_cute.png?1620064224" type="image/x-icon" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    
     <style>
         
     </style>
@@ -15,12 +16,12 @@
 
 <div id="app">
     <div class="container my-5">
-        <div class="row">
+        <div class="row" v-show="!cards.list.hidden">
             <div class="col-12 my-4">
                 <h1>歡迎回來</h1>
             </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 col-12" v-for="card in cards.list">
-                <div class="card">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12" v-for="card in cards.list.data">
+                <div class="card" type="button" @click.prevent="getCard(card.Guid)">
                     <div class="card-body">
                         <h3>{{card.Name}}</h3>
                         <table class="table table-borderless table-sm">
@@ -35,6 +36,37 @@
                 </div>
             </div>
         </div>
+        <div class="row" v-show="!cards.item.hidden">
+            <div class="col-12 mb-3">
+                <h1><i class="bi bi-chevron-left" type="button" @click.prevent="backToHome"></i></h1>
+            </div>
+            <div class="col-12">
+                <h1>{{cards.item.card.Name}}</h1>
+            </div>
+            <div class="col-12">
+                <table class="table table-borderless table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th scope="col">明細</th>
+                        <th scope="col">日期</th>
+                        <th scope="col">金額</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="item in cards.item.data">
+                        <td>{{item.Name}}</td>
+                        <td>{{formatDate(item.Date)}}</td>
+                        <td>${{item.Count}}</td>
+                        <td class="d-flex justify-content-evenly">
+                            <button type="button" class="btn btn-sm btn-outline-danger">刪除</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">編輯</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -47,7 +79,15 @@
         data(){
             return{
                 cards:{
-                    list:{}
+                    list:{
+                        data:{},
+                        hidden: false,
+                    },
+                    item:{
+                        data:{},
+                        card:{},
+                        hidden: true,
+                    },
                 }
             }
         },
@@ -59,12 +99,48 @@
                     method: 'get',
                     url: './api/card/list'
                 }).then(res => {
-                    console.log(res.data);
-                    vm.cards.list = res.data;
+                    vm.cards.list.data = res.data;
                 }).catch(err => {
                     console.log(err);
                 })
-            }
+            },
+            getCard: function (guid) {
+                let vm = this;
+                
+                axios({
+                    method: 'get',
+                    url: `./api/card/${guid}`
+                }).then(res => {
+                    vm.cards.list.hidden = true;
+                    vm.cards.item.hidden = false;
+                    vm.cards.item.card = res.data;
+                    
+                    vm.getDetails(vm.cards.item.card.Guid);
+                }).catch(err => {
+                    console.log(err);
+                })
+            },
+            getDetails: function (guid) {
+                let vm = this;
+                
+                axios({
+                    method: 'get',
+                    url: `./api/detail/list/${guid}`
+                }).then(res => {
+                    vm.cards.item.data = res.data;
+                }).catch(err => {
+                    console.log(err);
+                })
+            },
+            backToHome: function () {
+                let vm = this;
+
+                vm.cards.list.hidden = false;
+                vm.cards.item.hidden = true;
+            },
+            formatDate: function (date) {
+                return `${date.split('T')[0]} ${date.split('T')[1].split('+')[0]}`
+            },
         },
         mounted: function () {
             this.getCards();

@@ -7,29 +7,47 @@ namespace accounting_cards.Controllers
     [RoutePrefix("api/card")]
     public class CardController : ApiController
     {
+        private static readonly CardModel _cardDefault = new CardModel()
+        {
+            Guid = Guid.NewGuid(),
+            Name = "未分類",
+            Total = 0
+        };
+        
+        private static readonly CardModel _cardOne = new CardModel()
+        {
+            Guid = Guid.NewGuid(),
+            Name = "飲食",
+            Total = 0
+        };
+        
         [HttpGet]
         [Route("list")]
         public IHttpActionResult List()
         {
-            var result = new List<CardModel>();
-            
-            var card = new CardModel()
+            var result = new List<CardModel>
             {
-                Guid = Guid.NewGuid(),
-                Name = "未分類",
-                Total = 0
+                _cardDefault, _cardOne
             };
-            result.Add(card);
-            
-            card = new CardModel()
-            {
-                Guid = Guid.NewGuid(),
-                Name = "飲食",
-                Total = 0
-            };
-            result.Add(card);
             
             return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("{guid}")]
+        public IHttpActionResult Item(Guid guid)
+        {
+            if (_cardDefault.Guid == guid)
+            {
+                return Ok(_cardDefault);
+            }
+            
+            if (_cardOne.Guid == guid)
+            {
+                return Ok(_cardOne);
+            }
+            
+            return BadRequest("查無此張卡片");
         }
     }
 
