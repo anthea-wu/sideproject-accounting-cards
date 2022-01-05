@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 
 namespace accounting_cards.Controllers
@@ -7,46 +8,40 @@ namespace accounting_cards.Controllers
     [RoutePrefix("api/card")]
     public class CardController : ApiController
     {
-        private static readonly CardModel _cardDefault = new CardModel()
+        private readonly List<CardModel> _defaultCard = new List<CardModel>()
         {
-            Guid = Guid.NewGuid(),
-            Name = "未分類",
-            Total = 0
+            new CardModel()
+            {
+                Guid = Guid.NewGuid(),
+                Name = "未分類",
+                Total = 0
+            },
+            new CardModel()
+            {
+                Guid = Guid.NewGuid(),
+                Name = "飲食",
+                Total = 0
+            }
         };
-        
-        private static readonly CardModel _cardOne = new CardModel()
-        {
-            Guid = Guid.NewGuid(),
-            Name = "飲食",
-            Total = 0
-        };
-        
+
         [HttpGet]
         [Route("list")]
         public IHttpActionResult List()
         {
-            var result = new List<CardModel>
-            {
-                _cardDefault, _cardOne
-            };
-            
-            return Ok(result);
+            return Ok(_defaultCard);
         }
 
         [HttpGet]
         [Route("{guid}")]
         public IHttpActionResult Item(Guid guid)
         {
-            if (_cardDefault.Guid == guid)
+            var existCard = _defaultCard.FirstOrDefault(c => c.Guid == guid);
+            if (existCard != null)
             {
-                return Ok(_cardDefault);
+                _defaultCard.Remove(existCard);
+                return Ok(_defaultCard);
             }
-            
-            if (_cardOne.Guid == guid)
-            {
-                return Ok(_cardOne);
-            }
-            
+
             return BadRequest("查無此張卡片");
         }
 
@@ -54,12 +49,20 @@ namespace accounting_cards.Controllers
         [Route("new/{name}")]
         public IHttpActionResult Add(string name)
         {
-            var card = new CardModel()
+            var card = _defaultCard.FirstOrDefault(c => c.Name == name);
+            if (card != null)
+            {
+                return BadRequest("卡片名稱已存在");
+            }
+            
+            card = new CardModel()
             {
                 Guid = Guid.NewGuid(),
                 Name = name,
                 Total = 0
             };
+            _defaultCard.Add(card);
+            
             return Ok(card);
         }
     }
