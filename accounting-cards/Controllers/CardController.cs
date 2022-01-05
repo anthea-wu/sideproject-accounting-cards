@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Caching;
+using System.Web;
 using System.Web.Http;
+using Newtonsoft.Json;
 
 namespace accounting_cards.Controllers
 {
@@ -28,6 +31,14 @@ namespace accounting_cards.Controllers
         [Route("list")]
         public IHttpActionResult List()
         {
+            var policy = new CacheItemPolicy
+            {
+                SlidingExpiration = new TimeSpan(0, 5, 0)
+            };
+
+            var serializeCards = JsonConvert.SerializeObject(_defaultCard);
+            MemoryCache.Default.Set("cards", serializeCards, policy);
+            
             return Ok(_defaultCard);
         }
 
