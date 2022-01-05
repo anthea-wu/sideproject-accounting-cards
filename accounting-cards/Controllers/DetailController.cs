@@ -91,6 +91,31 @@ namespace accounting_cards.Controllers
 
             return Ok(result);
         }
+        
+        [HttpPost]
+        [Route("item")]
+        public IHttpActionResult Add(Detail newDetail)
+        {
+            var cards = JsonConvert.DeserializeObject<List<Card>>(_cache["cards"].ToString());
+            var card = cards.FirstOrDefault(c => c.Guid == newDetail.CardGuid);
+            if (card == null)
+            {
+                return BadRequest("卡片分類不存在");
+            }
+            
+            newDetail.Guid = Guid.NewGuid();
+
+            if (card.Name == "未分類")
+            {
+                _defaultDetail.Add(newDetail);
+                return Ok(_defaultDetail);
+            }
+            else
+            {
+                _foodDetails.Add(newDetail);
+                return Ok(_foodDetails);
+            }
+        }
     }
 
     public class DetailList
@@ -101,6 +126,9 @@ namespace accounting_cards.Controllers
 
     public class Detail
     {
+        /// <summary> 新增明細時使用，紀錄卡片類別的唯一碼 </summary>
+        public Guid CardGuid { get; set; }
+        
         public Guid Guid { get; set; }
         public string Name { get; set; }
         public int Count { get; set; }

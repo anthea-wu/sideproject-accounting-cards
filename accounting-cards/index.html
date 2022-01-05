@@ -84,6 +84,49 @@
                     </tbody>
                 </table>
             </div>
+            <div class="col-12">
+                <table class="table table-borderless align-middle">
+                    <tbody>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <span class="input-group-text">明細</span>
+                                <input type="text" class="form-control" placeholder="請輸入明細內容" v-model="cards.item.add.name">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-group">
+                                <span class="input-group-text">日期</span>
+                                <input type="date" class="form-control" v-model="cards.item.add.day">
+                                <span class="input-group-text">時間</span>
+                                <input type="time" class="form-control" v-model="cards.item.add.time">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-group">
+                                <span class="input-group-text">金額</span>
+                                <input type="text" class="form-control" placeholder="請輸入半形數字" v-model="cards.item.add.count">
+                                <span class="input-group-text">元</span>
+                            </div>
+                        </td>
+                        <td class="d-flex justify-content-evenly">
+                            <button type="button" class="btn btn-outline-primary" @click.prevent="addDetail(); getDetails(cards.item.card.Guid);">新增</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p class="mb-0 fw-light text-muted">明細內容不可留空</p>
+                        </td>
+                        <td>
+                            <p class="mb-0 fw-light text-muted">消費時間請利用上下方向鍵及數字鍵控制</p>
+                        </td>
+                        <td>
+                            <p class="mb-0 fw-light text-muted">消費金額不得為0或負數或包含小數點</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -106,6 +149,14 @@
                         data:{},
                         card:{},
                         hidden: true,
+                        add:{
+                            cardGuid: '',
+                            name: '',
+                            day: new Date().toJSON().substring(0,10),
+                            time: '00:00',
+                            count: 0,
+                            date: ''
+                        }
                     },
                     add:{
                         name: ''
@@ -213,6 +264,21 @@
                     console.log(err);
                 })
             },
+            addDetail: function () {
+                let vm = this;
+                
+                vm.cards.item.add.date = `${vm.cards.item.add.day} ${vm.cards.item.add.time}`;
+                
+                axios({
+                    method: 'post',
+                    url: `./api/detail/item`,
+                    data: vm.cards.item.add
+                }).then(res => {
+                    vm.cards.item.data = res.data;
+                }).catch(err => {
+                    console.log(err);
+                })
+            },
             backToHome: function () {
                 let vm = this;
 
@@ -222,6 +288,9 @@
             formatDate: function (date) {
                 return `${date.split('T')[0]} ${date.split('T')[1].split('+')[0]}`
             },
+        },
+        watch: {
+            
         },
         mounted: function () {
             this.getCards();
