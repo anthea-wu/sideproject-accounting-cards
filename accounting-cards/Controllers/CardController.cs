@@ -88,6 +88,19 @@ namespace accounting_cards.Controllers
             _defaultCard.Remove(existCard);
             return Ok(_defaultCard);
         }
+
+        [HttpPut]
+        public IHttpActionResult Update(Card card)
+        {
+            var existCard = _defaultCard.FirstOrDefault(c => c.Guid == card.Guid);
+            if (existCard == null)
+            {
+                return BadRequest("查無此張卡片");
+            }
+
+            existCard.Name = card.Name;
+            return Ok(_defaultCard);
+        }
     }
 
     public class Card

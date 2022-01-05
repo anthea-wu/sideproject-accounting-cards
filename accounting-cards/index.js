@@ -5,6 +5,13 @@
                 list:{
                     data:{},
                     hidden: false,
+                    add:{
+                        name: ''
+                    },
+                    edit:{
+                        name: '',
+                        guid: ''
+                    }
                 },
                 item:{
                     data:{},
@@ -26,9 +33,6 @@
                         count: 0,
                         date: ''
                     }
-                },
-                add:{
-                    name: ''
                 }
             }
         }
@@ -65,7 +69,7 @@
         addCard: function () {
             let vm = this;
 
-            if (vm.cards.add.name === '' || vm.cards.add.name.trim() === ''){
+            if (vm.cards.list.add.name === '' || vm.cards.list.add.name.trim() === ''){
                 Swal.fire({
                     icon: 'error',
                     text: '卡片名稱不能留白',
@@ -77,7 +81,7 @@
 
             let duplicate = false;
             Array.from(vm.cards.list.data).forEach((item, index, arr) => {
-                if (item.Name == vm.cards.add.name) {
+                if (item.Name == vm.cards.list.add.name) {
                     duplicate = true;
                     arr.splice(index, arr.length - index);
                     return;
@@ -92,17 +96,17 @@
                     timer: 2000,
                 })
 
-                vm.cards.add.name = '';
+                vm.cards.list.add.name = '';
                 return;
             }
 
             axios({
                 method: 'post',
                 url: `./api/card`,
-                data: vm.cards.add
+                data: vm.cards.list.add
             }).then(res => {
                 vm.cards.list.data = res.data;
-                vm.cards.add.name = '';
+                vm.cards.list.add.name = '';
             }).catch(err => {
                 console.log(err);
             })
@@ -118,6 +122,25 @@
             }).catch(err => {
                 console.log(err);
             })
+        },
+        updateCard: function () {
+            let vm = this;
+            console.log(vm.cards.list.edit);
+            
+            axios({
+                method: 'put',
+                url: './api/card',
+                data: vm.cards.list.edit
+            }).then(res => {
+                console.log(res.data);
+            }).catch(err => {
+                console.log(err);
+            })
+        },
+        setCardEditPage: function (card) {
+            let vm = this;
+            vm.cards.list.edit.guid = card.Guid;
+            vm.cards.list.edit.name = card.Name;
         },
         getDetails: function (guid) {
             let vm = this;
