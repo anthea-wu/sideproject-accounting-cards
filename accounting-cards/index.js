@@ -17,6 +17,14 @@
                         time: '00:00',
                         count: 0,
                         date: ''
+                    },
+                    edit:{
+                        cardGuid: '',
+                        name: '',
+                        day: new Date().toJSON().substring(0,10),
+                        time: '00:00',
+                        count: 0,
+                        date: ''
                     }
                 },
                 add:{
@@ -103,7 +111,7 @@
             let vm = this;
 
             axios({
-                method: 'Delete',
+                method: 'delete',
                 url: `./api/card/${guid}`
             }).then(res => {
                 vm.cards.list.data = res.data;
@@ -169,13 +177,42 @@
             let vm = this;
 
             axios({
-                method: 'Delete',
+                method: 'delete',
                 url: `./api/detail/item/${guid}`
             }).then(res => {
                 vm.cards.item.data = res.data;
             }).catch(err => {
                 console.log(err);
             })
+        },
+        updateDetail: function () {
+            let vm = this;
+
+            vm.cards.item.edit.date = `${vm.cards.item.edit.day} ${vm.cards.item.edit.time}`;
+            
+            axios({
+                method: 'put',
+                url: `./api/detail/item`,
+                data: vm.cards.item.edit
+            }).then(res => {
+                vm.cards.item.data = res.data;
+            }).catch(err => {
+                console.log(err);
+            })
+        },
+        setDetailEditPage: function (item) {
+            let vm = this;
+            
+            vm.cards.item.edit.cardGuid = item.CardGuid;
+            vm.cards.item.edit.guid = item.Guid;
+            vm.cards.item.edit.name = item.Name;
+            vm.cards.item.edit.count = item.Count;
+            
+            let formatDate = vm.formatDate(item.Date);
+            vm.cards.item.edit.day = formatDate.split(' ')[0];
+            vm.cards.item.edit.time = formatDate.split(' ')[1];
+            
+            vm.cards.item.edit.cardGuid = item.CardGuid;
         },
         backToHome: function () {
             let vm = this;

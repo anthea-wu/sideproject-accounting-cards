@@ -81,7 +81,7 @@
                         <td>${{item.Count}}</td>
                         <td class="d-flex justify-content-evenly">
                             <button type="button" class="btn btn-sm btn-outline-danger" @click.prevent="deleteDetail(item.Guid); getDetails(cards.item.card.Guid);">刪除</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">編輯</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailEditModal" @click="setDetailEditPage(item)">編輯</button>
                         </td>
                     </tr>
                     </tbody>
@@ -129,6 +129,46 @@
                     </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        
+        <!--明細：編輯-->
+        <div class="modal fade" data-bs-backdrop="static" id="detailEditModal" tabindex="-1" aria-labelledby="detailEditModal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detailEditModalLabel">編輯</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3 input-group">
+                            <label class="input-group-text">卡片分類</label>
+                            <select class="form-select" v-model="cards.item.edit.cardGuid">
+                                <option v-for="card in cards.list.data" :value="card.Guid">{{card.Name}}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label class="input-group-text">明細內容</label>
+                            <input type="text" class="form-control" v-model="cards.item.edit.name">
+                        </div>
+                        <div class="mb-3 input-group">
+
+                            <span class="input-group-text">日期</span>
+                            <input type="date" class="form-control" v-model="cards.item.edit.day">
+                            <span class="input-group-text">時間</span>
+                            <input type="time" class="form-control" v-model="cards.item.edit.time">
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label class="input-group-text">消費金額</label>
+                            <input type="text" class="form-control" v-model="cards.item.edit.count">
+                            <label class="input-group-text">元</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal" @click="updateDetail(); getDetails(cards.item.card.Guid);">儲存</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

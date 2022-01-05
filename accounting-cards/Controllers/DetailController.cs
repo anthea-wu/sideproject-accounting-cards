@@ -146,6 +146,64 @@ namespace accounting_cards.Controllers
             
             return BadRequest("查無此筆明細");
         }
+
+        [HttpPut]
+        [Route("item")]
+        public IHttpActionResult Update(Detail detail)
+        {
+            var defaultDetail = _defaultDetail.FirstOrDefault(d => d.Guid == detail.Guid);
+            var foodDetail = _foodDetails.FirstOrDefault(d => d.Guid == detail.Guid);
+            
+            if (defaultDetail != null)
+            {
+                if (defaultDetail.CardGuid != detail.CardGuid)
+                {
+                    _defaultDetail.Remove(defaultDetail);
+                    _foodDetails.Add(new Detail
+                    {
+                        Name = detail.Name,
+                        Count = detail.Count,
+                        Date = detail.Date,
+                        CardGuid = detail.CardGuid
+                    });
+                }
+                else
+                {
+                    defaultDetail.Name = detail.Name;
+                    defaultDetail.Count = detail.Count;
+                    defaultDetail.Date = detail.Date;
+                    defaultDetail.CardGuid = detail.CardGuid;
+                }
+
+                return Ok(_defaultDetail);
+            }
+
+            if (_foodDetails != null)
+            {
+                if (foodDetail.CardGuid != detail.CardGuid)
+                {
+                    _foodDetails.Remove(foodDetail);
+                    _defaultDetail.Add(new Detail()
+                    {
+                        Name = detail.Name,
+                        Count = detail.Count,
+                        Date = detail.Date,
+                        CardGuid = detail.CardGuid
+                    });
+                }
+                else
+                {
+                    foodDetail.Name = detail.Name;
+                    foodDetail.Count = detail.Count;
+                    foodDetail.Date = detail.Date;
+                    foodDetail.CardGuid = detail.CardGuid;
+                }
+
+                return Ok(_foodDetails);
+            }
+            
+            return BadRequest("查無此筆明細");
+        }
     }
 
     public class DetailList
