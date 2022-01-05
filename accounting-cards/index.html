@@ -72,7 +72,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="item in cards.item.data">
+                    <tr v-for="item in cards.item.details">
                         <td>{{item.Name}}</td>
                         <td>{{formatDate(item.Date)}}</td>
                         <td>${{item.Count}}</td>
@@ -206,7 +206,9 @@
                     method: 'get',
                     url: `./api/detail/list/${guid}`
                 }).then(res => {
-                    vm.cards.item.data = res.data;
+                    vm.cards.item.details = res.data.Details;
+                    console.log(res.data);
+                    vm.cards.item.add.cardGuid = res.data.CardGuid;
                 }).catch(err => {
                     console.log(err);
                 })

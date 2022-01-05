@@ -73,19 +73,33 @@ namespace accounting_cards.Controllers
             {
                 return BadRequest("卡片分類不存在");
             }
-            
+
+            var result = new DetailList
+            {
+                CardGuid = card.Guid,
+                Details = new List<Detail>()
+            };
+
             if (card.Name == "未分類")
             {
-                return Ok(_defaultDetail);
+                result.Details = _defaultDetail;
             }
             else
             {
-                return Ok(_foodDetails);
+                result.Details = _foodDetails;
             }
+
+            return Ok(result);
         }
     }
 
-    internal class Detail
+    public class DetailList
+    {
+        public Guid CardGuid { get; set; }
+        public List<Detail> Details { get; set; }
+    }
+
+    public class Detail
     {
         public Guid Guid { get; set; }
         public string Name { get; set; }
