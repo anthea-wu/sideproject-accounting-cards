@@ -38,8 +38,7 @@ namespace accounting_cards.Controllers
             var existCard = _defaultCard.FirstOrDefault(c => c.Guid == guid);
             if (existCard != null)
             {
-                _defaultCard.Remove(existCard);
-                return Ok(_defaultCard);
+                return Ok(existCard);
             }
 
             return BadRequest("查無此張卡片");
