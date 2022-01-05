@@ -49,6 +49,19 @@ namespace accounting_cards.Controllers
             
             return BadRequest("查無此張卡片");
         }
+
+        [HttpPost]
+        [Route("new/{name}")]
+        public IHttpActionResult Add(string name)
+        {
+            var card = new CardModel()
+            {
+                Guid = Guid.NewGuid(),
+                Name = name,
+                Total = 0
+            };
+            return Ok(card);
+        }
     }
 
     public class CardModel
