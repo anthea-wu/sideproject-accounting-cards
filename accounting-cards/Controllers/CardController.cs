@@ -45,8 +45,7 @@ namespace accounting_cards.Controllers
         }
 
         [HttpPost]
-        [Route("new/{name}")]
-        public IHttpActionResult Add(string name)
+        public IHttpActionResult Add(Card newCard)
         {
             var card = _defaultCard.FirstOrDefault(c => c.Name == name);
             if (card != null)
@@ -57,7 +56,7 @@ namespace accounting_cards.Controllers
             card = new Card()
             {
                 Guid = Guid.NewGuid(),
-                Name = name,
+                Name = newCard.Name,
                 Total = 0
             };
             _defaultCard.Add(card);

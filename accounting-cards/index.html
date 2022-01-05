@@ -157,7 +157,8 @@
                 
                 axios({
                     method: 'post',
-                    url: `./api/card/new/${vm.cards.add.name}`
+                    url: `./api/card`,
+                    data: vm.cards.add
                 }).then(res => {
                     vm.cards.list.data = res.data;
                     vm.cards.add.name = '';
