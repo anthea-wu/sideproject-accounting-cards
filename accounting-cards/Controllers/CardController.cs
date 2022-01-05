@@ -8,15 +8,15 @@ namespace accounting_cards.Controllers
     [RoutePrefix("api/card")]
     public class CardController : ApiController
     {
-        private readonly List<CardModel> _defaultCard = new List<CardModel>()
+        private static readonly List<Card> _defaultCard = new List<Card>()
         {
-            new CardModel()
+            new Card()
             {
                 Guid = Guid.NewGuid(),
                 Name = "未分類",
                 Total = 0
             },
-            new CardModel()
+            new Card()
             {
                 Guid = Guid.NewGuid(),
                 Name = "飲食",
@@ -36,12 +36,12 @@ namespace accounting_cards.Controllers
         public IHttpActionResult Item(Guid guid)
         {
             var existCard = _defaultCard.FirstOrDefault(c => c.Guid == guid);
-            if (existCard != null)
+            if (existCard == null)
             {
-                return Ok(existCard);
+                return BadRequest("查無此張卡片");
             }
 
-            return BadRequest("查無此張卡片");
+            return Ok(existCard);
         }
 
         [HttpPost]
@@ -54,7 +54,7 @@ namespace accounting_cards.Controllers
                 return BadRequest("卡片名稱已存在");
             }
             
-            card = new CardModel()
+            card = new Card()
             {
                 Guid = Guid.NewGuid(),
                 Name = name,
@@ -62,7 +62,7 @@ namespace accounting_cards.Controllers
             };
             _defaultCard.Add(card);
             
-            return Ok(card);
+            return Ok(_defaultCard);
         }
 
         [HttpDelete]
@@ -80,7 +80,7 @@ namespace accounting_cards.Controllers
         }
     }
 
-    public class CardModel
+    public class Card
     {
         public Guid Guid { get; set; }
         public string Name { get; set; }
