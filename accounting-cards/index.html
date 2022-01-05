@@ -21,9 +21,15 @@
                 <h1>歡迎回來</h1>
             </div>
             <div class="col-lg-3 col-md-4 col-sm-6 col-12 mt-2" v-for="card in cards.list.data">
-                <div class="card" type="button" @click.prevent="getCard(card.Guid)">
-                    <div class="card-body">
-                        <h3>{{card.Name}}</h3>
+                <div class="card" @click.prevent="getCard(card.Guid)">
+                    <div class="card-body" type="button">
+                        <h3 class="d-flex justify-content-between">
+                            {{card.Name}}
+                            <span>
+                                <button type="button" class="btn btn-sm btn-outline-danger me-2" @click.prevent.stop="deleteCard(card.Guid)">刪除</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary">編輯</button>
+                            </span>
+                        </h3>
                         <table class="table table-borderless table-sm">
                             <tbody>
                             <tr>
@@ -39,7 +45,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h3>
-                            <div class="input-group input-group-lg" @keyup.enter="addCard">
+                            <div class="input-group input-group-lg" @keydown.enter="addCard">
                                 <input type="text" class="form-control" v-model="cards.add.name">
                             </div>
                         </h3>
@@ -122,7 +128,7 @@
             },
             getCard: function (guid) {
                 let vm = this;
-                
+
                 axios({
                     method: 'get',
                     url: `./api/card/${guid}`
@@ -130,20 +136,8 @@
                     vm.cards.list.hidden = true;
                     vm.cards.item.hidden = false;
                     vm.cards.item.card = res.data;
-                    
+
                     vm.getDetails(vm.cards.item.card.Guid);
-                }).catch(err => {
-                    console.log(err);
-                })
-            },
-            getDetails: function (guid) {
-                let vm = this;
-                
-                axios({
-                    method: 'get',
-                    url: `./api/detail/list/${guid}`
-                }).then(res => {
-                    vm.cards.item.data = res.data;
                 }).catch(err => {
                     console.log(err);
                 })
@@ -165,8 +159,32 @@
                     method: 'post',
                     url: `./api/card/new/${vm.cards.add.name}`
                 }).then(res => {
-                    vm.cards.list.data.push(res.data);
+                    vm.cards.list.data = res.data;
                     vm.cards.add.name = '';
+                }).catch(err => {
+                    console.log(err);
+                })
+            },
+            deleteCard: function (guid) {
+                let vm = this;
+                
+                axios({
+                    method: 'Delete',
+                    url: `./api/card/${guid}`
+                }).then(res => {
+                    vm.cards.list.data = res.data;
+                }).catch(err => {
+                    console.log(err);
+                })
+            },
+            getDetails: function (guid) {
+                let vm = this;
+
+                axios({
+                    method: 'get',
+                    url: `./api/detail/list/${guid}`
+                }).then(res => {
+                    vm.cards.item.data = res.data;
                 }).catch(err => {
                     console.log(err);
                 })

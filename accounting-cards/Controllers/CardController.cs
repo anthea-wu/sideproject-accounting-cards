@@ -64,6 +64,20 @@ namespace accounting_cards.Controllers
             
             return Ok(card);
         }
+
+        [HttpDelete]
+        [Route("{guid}")]
+        public IHttpActionResult Delete(Guid guid)
+        {
+            var existCard = _defaultCard.FirstOrDefault(c => c.Guid == guid);
+            if (existCard == null)
+            {
+                return BadRequest("卡片不存在");
+            }
+
+            _defaultCard.Remove(existCard);
+            return Ok(_defaultCard);
+        }
     }
 
     public class CardModel
