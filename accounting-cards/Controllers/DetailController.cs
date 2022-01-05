@@ -116,6 +116,28 @@ namespace accounting_cards.Controllers
                 return Ok(_foodDetails);
             }
         }
+
+        [HttpDelete]
+        [Route("item/{guid}")]
+        public IHttpActionResult Delete(Guid guid)
+        {
+            var defaultDetail = _defaultDetail.FirstOrDefault(d => d.Guid == guid);
+            var foodDetail = _foodDetails.FirstOrDefault(d => d.Guid == guid);
+
+            if (defaultDetail != null)
+            {
+                _defaultDetail.Remove(defaultDetail);
+                return Ok(_defaultDetail);
+            }
+
+            if (_foodDetails != null)
+            {
+                _foodDetails.Remove(foodDetail);
+                return Ok(_foodDetails);
+            }
+            
+            return BadRequest("查無此筆明細");
+        }
     }
 
     public class DetailList

@@ -119,7 +119,6 @@
                 url: `./api/detail/list/${guid}`
             }).then(res => {
                 vm.cards.item.details = res.data.Details;
-                console.log(res.data);
                 vm.cards.item.add.cardGuid = res.data.CardGuid;
             }).catch(err => {
                 console.log(err);
@@ -164,6 +163,18 @@
                 vm.cards.item.add.time = '00:00';
                 vm.cards.item.add.count = 0;
                 vm.cards.item.add.date = '';
+            })
+        },
+        deleteDetail: function (guid) {
+            let vm = this;
+
+            axios({
+                method: 'Delete',
+                url: `./api/detail/item/${guid}`
+            }).then(res => {
+                vm.cards.item.data = res.data;
+            }).catch(err => {
+                console.log(err);
             })
         },
         backToHome: function () {

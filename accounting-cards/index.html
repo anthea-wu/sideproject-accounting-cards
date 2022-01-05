@@ -80,7 +80,7 @@
                         <td>{{formatDate(item.Date)}}</td>
                         <td>${{item.Count}}</td>
                         <td class="d-flex justify-content-evenly">
-                            <button type="button" class="btn btn-sm btn-outline-danger">刪除</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" @click.prevent="deleteDetail(item.Guid); getDetails(cards.item.card.Guid);">刪除</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary">編輯</button>
                         </td>
                     </tr>
