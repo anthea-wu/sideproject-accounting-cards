@@ -266,6 +266,26 @@
             },
             addDetail: function () {
                 let vm = this;
+
+                if (vm.cards.item.add.name === '' || vm.cards.item.add.time.trim() === ''){
+                    Swal.fire({
+                        icon: 'error',
+                        text: '明細內容不得留空',
+                        showConfirmButton: false,
+                        timer: 2000,
+                    })
+                    return;
+                }
+                
+                if (vm.cards.item.add.count <= 0){
+                    Swal.fire({
+                        icon: 'error',
+                        text: '明細金額不得小於等於0',
+                        showConfirmButton: false,
+                        timer: 2000,
+                    })
+                    return;
+                }
                 
                 vm.cards.item.add.date = `${vm.cards.item.add.day} ${vm.cards.item.add.time}`;
                 
