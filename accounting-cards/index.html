@@ -154,7 +154,28 @@
                     })
                     return;
                 }
+
+                let duplicate = false;
+                Array.from(vm.cards.list.data).forEach((item, index, arr) => {
+                    if (item.Name == vm.cards.add.name) {
+                        duplicate = true;
+                        arr.splice(index, arr.length - index);
+                        return;
+                    }
+                })
                 
+                if (duplicate){
+                    Swal.fire({
+                        icon: 'error',
+                        text: '卡片名稱已存在',
+                        showConfirmButton: false,
+                        timer: 2000,
+                    })
+                    
+                    vm.cards.add.name = '';
+                    return;
+                }
+                           
                 axios({
                     method: 'post',
                     url: `./api/card`,

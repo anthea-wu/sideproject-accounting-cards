@@ -47,7 +47,7 @@ namespace accounting_cards.Controllers
         [HttpPost]
         public IHttpActionResult Add(Card newCard)
         {
-            var card = _defaultCard.FirstOrDefault(c => c.Name == name);
+            var card = _defaultCard.FirstOrDefault(c => c.Name == newCard.Name);
             if (card != null)
             {
                 return BadRequest("卡片名稱已存在");
