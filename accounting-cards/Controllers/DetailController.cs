@@ -82,10 +82,18 @@ namespace accounting_cards.Controllers
 
             if (card.Name == "未分類")
             {
+                foreach (var detail in _defaultDetail)
+                {
+                    detail.CardGuid = card.Guid;
+                }
                 result.Details = _defaultDetail;
             }
             else
             {
+                foreach (var detail in _foodDetails)
+                {
+                    detail.CardGuid = card.Guid;
+                }
                 result.Details = _foodDetails;
             }
 
@@ -148,7 +156,7 @@ namespace accounting_cards.Controllers
 
     public class Detail
     {
-        /// <summary> 新增明細時使用，紀錄卡片類別的唯一碼 </summary>
+        /// <summary> 紀錄卡片類別的唯一碼 </summary>
         public Guid CardGuid { get; set; }
         
         public Guid Guid { get; set; }
