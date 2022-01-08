@@ -5,6 +5,7 @@
 - [X] CRUD - 2022/01/05
 - [ ] third party login with google
 - [ ] setting alerts for create detail
+- [ ] database with firebase
 - [ ] the most detail list
 - [ ] chart for every month
 
