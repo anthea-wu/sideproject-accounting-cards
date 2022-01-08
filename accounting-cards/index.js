@@ -105,16 +105,63 @@
             })
         },
         deleteCard: function (guid) {
-            let vm = this;
-
-            axios({
-                method: 'delete',
-                url: `./api/card/${guid}`
+            let exist = this.cards.list.data.find(c => c.Guid == guid);
+            if (exist.Name == "未分類"){
+                swal.fire({
+                    icon: 'warning',
+                    text: '預設分類不能刪除',
+                    showConfirmButton: false,
+                    timer: 2000
+                })
+                return;
+            }
+            
+            let existDetails = [];
+            
+            swal.fire({
+                icon: 'warning',
+                text: '卡片刪除後底下的明細也會自動刪除',
+                showCancelButton: 'true',
+                confirmButtonText: '刪除',
+                cancelButtonText: '取消'
             }).then(res => {
-                vm.cards.list.data = res.data;
-            }).catch(err => {
-                apiFailed(err.response.status, err.response.data.Message);
-            })
+                if (res.isConfirmed){
+                    axios({
+                        method: 'get',
+                        url: `./api/detail/list/${guid}`
+                    }).then(res => {
+                        existDetails = res.data.Details;
+                        existDetails.forEach(item => {
+                            axios({
+                                method: 'delete',
+                                url: `./api/detail/item/${item.Guid}`
+                            }).then(res => {
+                                console.log(`delete item: ${item.Name}`);
+                            }).catch(err => {
+                                apiFailed(err.response.status, `明細名稱 [${item.Name}] 刪除失敗`);
+                                console.log(err)
+                            })
+                        });
+                        axios({
+                            method: 'delete',
+                            url: `./api/card/${guid}`
+                        }).then(res => {
+                            this.cards.list.data = res.data;
+                            swal.fire({
+                                icon: 'success',
+                                text: '刪除成功',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }).catch(err => {
+                            apiFailed(err.response.status, err.response.data.Message);
+                        })
+                    }).catch(err => {
+                        apiFailed(err.response.status, `卡片名稱 [${exist.Name}] 的明細取得失敗`);
+                        console.log(err)
+                    })
+                }
+            })            
         },
         updateCard: function () {
             let duplicate =  this.checkDuplicate(this.cards.list.edit.name);

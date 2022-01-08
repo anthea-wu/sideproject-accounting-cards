@@ -85,6 +85,11 @@ namespace accounting_cards.Controllers
                 return BadRequest("卡片不存在");
             }
 
+            if (existCard.Name == "未分類")
+            {
+                return BadRequest("預設分類不能刪除");
+            }
+
             _defaultCard.Remove(existCard);
             return Ok(_defaultCard);
         }
