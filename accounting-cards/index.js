@@ -47,7 +47,7 @@
             }).then(res => {
                 vm.cards.list.data = res.data;
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             })
         },
         getCard: function (guid) {
@@ -63,7 +63,7 @@
 
                 vm.getDetails(vm.cards.item.card.Guid);
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             })
         },
         addCard: function () {
@@ -101,7 +101,7 @@
                 vm.cards.list.data = res.data;
                 vm.cards.list.add.name = '';
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             })
         },
         deleteCard: function (guid) {
@@ -113,7 +113,7 @@
             }).then(res => {
                 vm.cards.list.data = res.data;
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             })
         },
         updateCard: function () {
@@ -140,7 +140,7 @@
                     timer: 2000,
                 })
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             })
         },
         setCardEditPage: function (card) {
@@ -158,7 +158,7 @@
                 vm.cards.item.details = res.data.Details;
                 vm.cards.item.add.cardGuid = res.data.CardGuid;
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             })
         },
         addDetail: function () {
@@ -193,7 +193,7 @@
             }).then(res => {
                 vm.cards.item.data = res.data;
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
                 vm.cards.item.add.name = '';
                 vm.cards.item.add.day = new Date().toJSON().substring(0,10);
@@ -213,7 +213,7 @@
             }).then(res => {
                 vm.cards.item.data = res.data;
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
                 this.getDetails(this.cards.item.card.Guid);
             })
@@ -230,7 +230,7 @@
             }).then(res => {
                 vm.cards.item.data = res.data;
             }).catch(err => {
-                console.log(err);
+                apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
                 this.getDetails(this.cards.item.card.Guid);
             })

@@ -135,6 +135,7 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <ItemGroup>
+        <Content Include="all.js" />
         <Content Include="favicon.ico" />
         <Content Include="Global.asax" />
         <Content Include="index.html" />
