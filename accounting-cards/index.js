@@ -117,15 +117,28 @@
             })
         },
         updateCard: function () {
-            let vm = this;
-            console.log(vm.cards.list.edit);
+            let duplicate =  this.checkDuplicate(this.cards.list.edit.name);
+            if (duplicate){
+                Swal.fire({
+                    icon: 'error',
+                    text: '卡片名稱已存在',
+                    showConfirmButton: false,
+                    timer: 2000,
+                });
+                return;
+            }
             
             axios({
                 method: 'put',
                 url: './api/card',
-                data: vm.cards.list.edit
+                data: this.cards.list.edit
             }).then(res => {
-                console.log(res.data);
+                swal.fire({
+                    icon: 'success',
+                    text: '卡片更新成功',
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
             }).catch(err => {
                 console.log(err);
             })
