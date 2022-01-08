@@ -79,14 +79,7 @@
                 return;
             }
 
-            let duplicate = false;
-            Array.from(vm.cards.list.data).forEach((item, index, arr) => {
-                if (item.Name == vm.cards.list.add.name) {
-                    duplicate = true;
-                    arr.splice(index, arr.length - index);
-                    return;
-                }
-            })
+            let duplicate = this.checkDuplicate(vm.cards.list.add.name);
 
             if (duplicate){
                 Swal.fire({
@@ -257,6 +250,17 @@
         },
         formatDate: function (date) {
             return `${date.split('T')[0]} ${date.split('T')[1].split('+')[0]}`
+        },
+        checkDuplicate: function (name) {
+            let duplicate = false;
+            Array.from(this.cards.list.data).forEach((item, index, arr) => {
+                if (item.Name == name) {
+                    duplicate = true;
+                    arr.splice(index, arr.length - index);
+                    return;
+                }
+            })
+            return duplicate;
         },
     },
     watch: {
