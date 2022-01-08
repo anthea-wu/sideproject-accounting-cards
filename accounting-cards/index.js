@@ -194,6 +194,8 @@
                 vm.cards.item.add.time = '00:00';
                 vm.cards.item.add.count = 0;
                 vm.cards.item.add.date = '';
+                
+                this.getDetails(this.cards.item.card.Guid);
             })
         },
         deleteDetail: function (guid) {
@@ -206,6 +208,8 @@
                 vm.cards.item.data = res.data;
             }).catch(err => {
                 console.log(err);
+            }).then(() => {
+                this.getDetails(this.cards.item.card.Guid);
             })
         },
         updateDetail: function () {
@@ -221,6 +225,8 @@
                 vm.cards.item.data = res.data;
             }).catch(err => {
                 console.log(err);
+            }).then(() => {
+                this.getDetails(this.cards.item.card.Guid);
             })
         },
         setDetailEditPage: function (item) {
