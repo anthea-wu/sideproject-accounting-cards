@@ -20,15 +20,20 @@
             <div class="col-12 my-4">
                 <h1>你好，這裡是記帳卡片。</h1>
             </div>
-            <div class="col-md-5 col-12 mt-2">
+            <div class="col-md-4 col-12 mt-2">
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex flex-row align-items-center">
-                            <input class="form-check-input mt-0" type="radio" id="radioLogin" value="0">
-                            <label class="form-check-label" for="radioLogin">登入</label>
-                            <input class="form-check-input mt-0" type="radio" id="radioRegister" value="1">
-                            <label class="form-check-label" for="radioRegister">註冊</label>
-                        </div>
+                        <h3>
+                            <div class="input-group input-group-lg">
+                                <input type="text" class="form-control" v-model="user.info.account">
+                            </div>
+                        </h3>
+                        <p class="mb-0 mt-3 fw-light text-muted d-flex align-items-center justify-content-between">
+                            請輸入帳號來登入或是註冊
+                            <span>
+                                <button class="btn btn-outline-secondary btn-sm" @click.prevent="getSession">下一步</button>
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>

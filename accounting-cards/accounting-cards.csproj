@@ -228,6 +228,7 @@
     <Compile Include="App_Start\WebConfig.cs" />
     <Compile Include="Controllers\CardController.cs" />
     <Compile Include="Controllers\DetailController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

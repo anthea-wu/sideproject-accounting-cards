@@ -34,10 +34,33 @@
                         date: ''
                     }
                 }
+            },
+            user: {
+                info: {
+                    account: '',
+                    name: '',
+                    id: ''
+                },
+                cards: {
+                    list: {
+                        hidden: false,
+                        data: [],
+                    }
+                }
             }
         }
     },
     methods:{
+        getSession: function () {
+            axios({
+                url: `./api/user/session/${this.user.info.account}`,
+                method: 'get'
+            }).then(res => {
+                console.log(res);
+            }).catch(err => {
+                console.log(err);
+            })
+        },
         getCards: function () {
             let vm = this;
 
