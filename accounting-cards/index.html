@@ -16,6 +16,24 @@
 
 <div id="app">
     <div class="container my-5">
+        <div class="row">
+            <div class="col-12 my-4">
+                <h1>你好，這裡是記帳卡片。</h1>
+            </div>
+            <div class="col-md-5 col-12 mt-2">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-row align-items-center">
+                            <input class="form-check-input mt-0" type="radio" id="radioLogin" value="0">
+                            <label class="form-check-label" for="radioLogin">登入</label>
+                            <input class="form-check-input mt-0" type="radio" id="radioRegister" value="1">
+                            <label class="form-check-label" for="radioRegister">註冊</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!--首頁：卡片清單-->
         <div class="row" v-show="!cards.list.hidden">
             <div class="col-12 my-4">
