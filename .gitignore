@@ -2,3 +2,4 @@
 /.vs
 /accounting-cards/obj
 /accounting-cards/bin
+*.json
