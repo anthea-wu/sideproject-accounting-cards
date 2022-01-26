@@ -4,7 +4,7 @@
             cards:{
                 list:{
                     data:{},
-                    hidden: false,
+                    hidden: true,
                     add:{
                         name: ''
                     },
@@ -36,10 +36,15 @@
                 }
             },
             user: {
+                session: {
+                    get: false,
+                    news: null,
+                },
                 info: {
-                    account: '',
                     name: '',
-                    id: ''
+                    id: '',
+                    token: '',
+                    error: false,
                 },
                 cards: {
                     list: {
@@ -51,15 +56,38 @@
         }
     },
     methods:{
-        getSession: function () {
+        checkUser: function () {
+            if (this.user.info.id === '') {
+                this.postUser();
+            } else {
+                this.getSession();
+            }
+        },
+        postUser: function () {
             axios({
-                url: `./api/user/session/${this.user.info.account}`,
-                method: 'get'
+                url: `./api/user/new`,
+                method: 'post',
+                data: this.user.info
             }).then(res => {
-                console.log(res);
+                this.user.info.id = res.data.Id;
+                this.user.session.news = true;
+                document.cookie = `userId=${res.data.Id}; max-age=2592000`;
             }).catch(err => {
                 console.log(err);
             })
+        },
+        getSession: function () {
+                axios({
+                    url: `./api/user/session/${this.user.info.id}`,
+                    method: 'get'
+                }).then(res => {
+                    this.user.info.name = res.data.Name;
+                    document.cookie = `userId=${res.data.Id}; max-age=2592000`;
+                    this.getCards();
+                }).catch(err => {
+                    console.log(err);
+                    this.user.info.error = true;
+                })
         },
         getCards: function () {
             let vm = this;
@@ -69,6 +97,9 @@
                 url: './api/card/list'
             }).then(res => {
                 vm.cards.list.data = res.data;
+                this.cards.list.hidden = false;
+                this.user.session.get = true;
+                this.user.session.news = false;
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             })
@@ -350,7 +381,7 @@
 
     },
     mounted: function () {
-        this.getCards();
+        // this.getCards();
     }
 });
 app.mount('#app')
