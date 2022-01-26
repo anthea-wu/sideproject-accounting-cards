@@ -41,7 +41,6 @@
                     news: null,
                 },
                 info: {
-                    name: '',
                     id: '',
                     token: '',
                     error: false,
@@ -71,23 +70,31 @@
             }).then(res => {
                 this.user.info.id = res.data.Id;
                 this.user.session.news = true;
-                document.cookie = `userId=${res.data.Id}; max-age=2592000`;
+                let info = JSON.stringify(res.data);
+                localStorage.setItem('userInfo', info);
             }).catch(err => {
                 console.log(err);
             })
         },
         getSession: function () {
+            if (localStorage.length !== 0){
+                let userInfoStr = localStorage.getItem('userInfo');
+                let userInfo = JSON.parse(userInfoStr);
+                this.user.info.id = userInfo.Id;
+                this.getCards();
+            }else{
                 axios({
                     url: `./api/user/session/${this.user.info.id}`,
                     method: 'get'
                 }).then(res => {
-                    this.user.info.name = res.data.Name;
-                    document.cookie = `userId=${res.data.Id}; max-age=2592000`;
+                    let info = JSON.stringify(res.data);
+                    localStorage.setItem('userInfo', info);
                     this.getCards();
                 }).catch(err => {
                     console.log(err);
                     this.user.info.error = true;
                 })
+            }
         },
         getCards: function () {
             let vm = this;
