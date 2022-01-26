@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using Google.Cloud.Firestore;
+using Google.Cloud.Firestore.V1;
 using Newtonsoft.Json;
 
 namespace accounting_cards.Controllers
@@ -11,6 +15,11 @@ namespace accounting_cards.Controllers
     [RoutePrefix("api/detail")]
     public class DetailController : ApiController
     {
+        private static readonly string _jsonPath = Properties.Settings.Default.FirebaseJsonPath;
+        static readonly string _jsonStr = File.ReadAllText(_jsonPath);
+        private static readonly FirestoreClientBuilder _builder = new FirestoreClientBuilder(){JsonCredentials = _jsonStr};
+        private readonly FirestoreDb _db = FirestoreDb.Create("accounting-cards", _builder.Build());
+        
         private static readonly List<Detail> _defaultDetail = new List<Detail>()
         {
             new Detail()
@@ -64,40 +73,21 @@ namespace accounting_cards.Controllers
         private readonly MemoryCache _cache = MemoryCache.Default;
 
         [HttpGet]
-        [Route("list/{guid}")]
-        public IHttpActionResult List(Guid guid)
+        [Route("{userId}/{cardId}")]
+        public async Task<IHttpActionResult> List(string userId, string cardId)
         {
-            var cards = JsonConvert.DeserializeObject<List<Card>>(_cache["cards"].ToString());
-            var card = cards.FirstOrDefault(c => c.Guid == guid);
-            if (card == null)
+            var results = await _db
+                .Collection("users").Document(userId)
+                .Collection("cards").Document(cardId)
+                .Collection("details").GetSnapshotAsync();
+            
+            foreach (var result in results)
             {
-                return BadRequest("卡片分類不存在");
+                var card = result.ConvertTo<UserCard>();
+                
             }
-
-            var result = new DetailList
-            {
-                CardGuid = card.Guid,
-                Details = new List<Detail>()
-            };
-
-            if (card.Name == "未分類")
-            {
-                foreach (var detail in _defaultDetail)
-                {
-                    detail.CardGuid = card.Guid;
-                }
-                result.Details = _defaultDetail;
-            }
-            else
-            {
-                foreach (var detail in _foodDetails)
-                {
-                    detail.CardGuid = card.Guid;
-                }
-                result.Details = _foodDetails;
-            }
-
-            return Ok(result);
+            
+            return Ok();
         }
         
         [HttpPost]

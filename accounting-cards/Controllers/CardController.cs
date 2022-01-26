@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using Google.Cloud.Firestore;
+using Google.Cloud.Firestore.V1;
 using Newtonsoft.Json;
 
 namespace accounting_cards.Controllers
@@ -11,6 +15,11 @@ namespace accounting_cards.Controllers
     [RoutePrefix("api/card")]
     public class CardController : ApiController
     {
+        private static readonly string _jsonPath = Properties.Settings.Default.FirebaseJsonPath;
+        static readonly string _jsonStr = File.ReadAllText(_jsonPath);
+        private static readonly FirestoreClientBuilder _builder = new FirestoreClientBuilder(){JsonCredentials = _jsonStr};
+        private readonly FirestoreDb _db = FirestoreDb.Create("accounting-cards", _builder.Build());
+        
         private static readonly List<Card> _defaultCard = new List<Card>()
         {
             new Card()
@@ -28,83 +37,99 @@ namespace accounting_cards.Controllers
         };
 
         [HttpGet]
-        [Route("list")]
-        public IHttpActionResult List()
+        [Route("{id}/list")]
+        public async Task<IHttpActionResult> List(string id)
         {
-            var policy = new CacheItemPolicy
-            {
-                SlidingExpiration = new TimeSpan(0, 5, 0)
-            };
-
-            var serializeCards = JsonConvert.SerializeObject(_defaultCard);
-            MemoryCache.Default.Set("cards", serializeCards, policy);
+            var cards = new List<UserCard>();
             
-            return Ok(_defaultCard);
+            var results = await _db
+                .Collection("users").Document(id)
+                .Collection("cards").OrderBy("CreateTime")
+                .GetSnapshotAsync();
+            foreach (var result in results)
+            {
+                var card = result.ConvertTo<UserCard>();
+                cards.Add(card);
+            }
+            return Ok(cards);
         }
 
         [HttpGet]
-        [Route("{guid}")]
-        public IHttpActionResult Item(Guid guid)
+        [Route("{userId}/{cardId}")]
+        public async Task<IHttpActionResult> Item(string userId, string cardId)
         {
-            var existCard = _defaultCard.FirstOrDefault(c => c.Guid == guid);
-            if (existCard == null)
-            {
-                return BadRequest("查無此張卡片");
-            }
+            var result =  await _db
+                .Collection("users").Document(userId)
+                .Collection("cards").Document(cardId)
+                .GetSnapshotAsync();
 
-            return Ok(existCard);
+            var card = result.ConvertTo<UserCard>();
+
+            return Ok(card);
         }
 
         [HttpPost]
-        public IHttpActionResult Add(Card newCard)
+        public async Task<IHttpActionResult> Add(UserCard newCard)
         {
-            var card = _defaultCard.FirstOrDefault(c => c.Name == newCard.Name);
-            if (card != null)
+            var cardCollection = _db.Collection("users").Document(newCard.UserId).Collection("cards").Document();
+            newCard.Id = cardCollection.Id;
+            newCard.CreateTime = DateTimeOffset.Now;
+            await cardCollection.SetAsync(newCard);
+            
+            var results =  await _db
+                .Collection("users").Document(newCard.UserId)
+                .Collection("cards").OrderBy("CreateTime")
+                .GetSnapshotAsync();
+
+            var cards = new List<UserCard>();
+            foreach (var result in results)
             {
-                return BadRequest("卡片名稱已存在");
+                var card = result.ConvertTo<UserCard>();
+                cards.Add(card);
             }
-            
-            card = new Card()
-            {
-                Guid = Guid.NewGuid(),
-                Name = newCard.Name,
-                Total = 0
-            };
-            _defaultCard.Add(card);
-            
-            return Ok(_defaultCard);
+            return Ok(cards);
         }
 
         [HttpDelete]
-        [Route("{guid}")]
-        public IHttpActionResult Delete(Guid guid)
+        public async Task<IHttpActionResult> Delete(UserCard deleteCard)
         {
-            var existCard = _defaultCard.FirstOrDefault(c => c.Guid == guid);
-            if (existCard == null)
-            {
-                return BadRequest("卡片不存在");
-            }
+            await _db
+                .Collection("users").Document(deleteCard.UserId)
+                .Collection("cards").Document(deleteCard.Id).DeleteAsync();
+            
+            var results =  await _db
+                .Collection("users").Document(deleteCard.UserId)
+                .Collection("cards").OrderBy("CreateTime")
+                .GetSnapshotAsync();
 
-            if (existCard.Name == "未分類")
+            var cards = new List<UserCard>();
+            foreach (var result in results)
             {
-                return BadRequest("預設分類不能刪除");
+                var card = result.ConvertTo<UserCard>();
+                cards.Add(card);
             }
-
-            _defaultCard.Remove(existCard);
-            return Ok(_defaultCard);
+            return Ok(cards);
         }
 
         [HttpPut]
-        public IHttpActionResult Update(Card card)
+        public async Task<IHttpActionResult> Update(UserCard updateCard)
         {
-            var existCard = _defaultCard.FirstOrDefault(c => c.Guid == card.Guid);
-            if (existCard == null)
-            {
-                return BadRequest("查無此張卡片");
-            }
+            await _db
+                .Collection("users").Document(updateCard.UserId)
+                .Collection("cards").Document(updateCard.Id).SetAsync(updateCard);
 
-            existCard.Name = card.Name;
-            return Ok(_defaultCard);
+            var results =  await _db
+                .Collection("users").Document(updateCard.UserId)
+                .Collection("cards").OrderBy("CreateTime")
+                .GetSnapshotAsync();
+
+            var cards = new List<UserCard>();
+            foreach (var result in results)
+            {
+                var card = result.ConvertTo<UserCard>();
+                cards.Add(card);
+            }
+            return Ok(cards);
         }
     }
 

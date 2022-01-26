@@ -52,6 +52,8 @@ namespace accounting_cards.Controllers
             {
                 Id = cards.Id,
                 Name = "未分類",
+                Total = 0,
+                UserId = newUser.Id,
                 CreateTime = DateTimeOffset.Now
             };
             await cards.SetAsync(defaultCard);
@@ -68,6 +70,12 @@ namespace accounting_cards.Controllers
         
         [FirestoreProperty]
         public string Name { get; set; }
+        
+        [FirestoreProperty]
+        public int Total { get; set; }
+
+        [FirestoreProperty]
+        public string UserId { get; set; }
         
         [FirestoreProperty]
         public DateTimeOffset CreateTime { get; set; }

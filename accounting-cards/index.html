@@ -53,15 +53,15 @@
                 </h1>
             </div>
             <div class="col-lg-3 col-md-4 col-sm-6 col-12 mt-2" v-for="card in cards.list.data">
-                <div class="card" @click.prevent="getCard(card.Guid)">
+                <div class="card" @click.prevent="getCard(card.Id)">
                     <div class="card-body" type="button">
                         <h3 class="d-flex justify-content-between">
                             <span>
                                 {{card.Name}}
                             </span>
                             <span>
-                                <button type="button" class="btn btn-sm btn-outline-danger me-2" @click.prevent.stop="deleteCard(card.Guid)">刪除</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#cardEditModal" @click.prevent.stop="setCardEditPage(card)">編輯</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger me-2" @click.prevent.stop="deleteCard(card.Id)" :disabled="cards.is.deleting || cards.is.updating">刪除</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#cardEditModal" @click.prevent.stop="setCardEditPage(card)" :disabled="cards.is.updating || cards.is.deleting">編輯</button>
                             </span>
                         </h3>
                         <table class="table table-borderless table-sm">
@@ -80,7 +80,7 @@
                     <div class="card-body">
                         <h3>
                             <div class="input-group input-group-lg" @keydown.enter="addCard">
-                                <input type="text" class="form-control" v-model="cards.list.add.name">
+                                <input type="text" class="form-control" v-model="cards.list.add.name" :disabled="cards.is.adding">
                             </div>
                         </h3>
                         <p class="mb-0 mt-3 fw-light text-muted">按下Enter來建立卡片</p>
@@ -120,6 +120,7 @@
                     </tbody>
                 </table>
             </div>
+            <hr>
             <div class="col-12">
                 <table class="table table-borderless align-middle">
                     <tbody>

@@ -6,11 +6,13 @@
                     data:{},
                     hidden: true,
                     add:{
-                        name: ''
+                        name: '',
+                        userId: '',
                     },
                     edit:{
                         name: '',
-                        guid: ''
+                        id: '',
+                        createTime: '',
                     }
                 },
                 item:{
@@ -33,6 +35,11 @@
                         count: 0,
                         date: ''
                     }
+                },
+                is: {
+                    adding: false,
+                    deleting: false,
+                    updating: false,
                 }
             },
             user: {
@@ -51,10 +58,11 @@
                         data: [],
                     }
                 }
-            }
+            },
         }
     },
     methods:{
+        // about user
         checkUser: function () {
             if (this.user.info.id === '') {
                 this.postUser();
@@ -89,6 +97,7 @@
                 }).then(res => {
                     let info = JSON.stringify(res.data);
                     localStorage.setItem('userInfo', info);
+                    this.user.info.id = res.data.Id;
                     this.getCards();
                 }).catch(err => {
                     console.log(err);
@@ -96,14 +105,13 @@
                 })
             }
         },
+        // abount cards
         getCards: function () {
-            let vm = this;
-
             axios({
                 method: 'get',
-                url: './api/card/list'
+                url: `./api/card/${this.user.info.id}/list`
             }).then(res => {
-                vm.cards.list.data = res.data;
+                this.cards.list.data = res.data;
                 this.cards.list.hidden = false;
                 this.user.session.get = true;
                 this.user.session.news = false;
@@ -111,26 +119,22 @@
                 apiFailed(err.response.status, err.response.data.Message);
             })
         },
-        getCard: function (guid) {
-            let vm = this;
-
+        getCard: function (id) {
             axios({
                 method: 'get',
-                url: `./api/card/${guid}`
+                url: `./api/card/${this.user.info.id}/${id}`
             }).then(res => {
-                vm.cards.list.hidden = true;
-                vm.cards.item.hidden = false;
-                vm.cards.item.card = res.data;
+                this.cards.list.hidden = true;
+                this.cards.item.hidden = false;
+                this.cards.item.card = res.data;
 
-                vm.getDetails(vm.cards.item.card.Guid);
+                this.getDetails(this.cards.item.card.Id);
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             })
         },
         addCard: function () {
-            let vm = this;
-
-            if (vm.cards.list.add.name === '' || vm.cards.list.add.name.trim() === ''){
+            if (this.cards.list.add.name === '' || this.cards.list.add.name.trim() === ''){
                 Swal.fire({
                     icon: 'error',
                     text: '卡片名稱不能留白',
@@ -140,7 +144,7 @@
                 return;
             }
 
-            let duplicate = this.checkDuplicate(vm.cards.list.add.name);
+            let duplicate = this.checkDuplicate(this.cards.list.add.name);
 
             if (duplicate){
                 Swal.fire({
@@ -150,23 +154,27 @@
                     timer: 2000,
                 })
 
-                vm.cards.list.add.name = '';
+                this.cards.list.add.name = '';
                 return;
             }
 
+            this.cards.list.add.userId = this.user.info.id;
+            this.cards.is.adding = true;
             axios({
                 method: 'post',
                 url: `./api/card`,
-                data: vm.cards.list.add
+                data: this.cards.list.add
             }).then(res => {
-                vm.cards.list.data = res.data;
-                vm.cards.list.add.name = '';
+                this.cards.list.data = res.data;
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
+            }).then(() => {
+                this.cards.is.adding = false;
+                this.cards.list.add.name = '';
             })
         },
-        deleteCard: function (guid) {
-            let exist = this.cards.list.data.find(c => c.Guid == guid);
+        deleteCard: function (id) {
+            let exist = this.cards.list.data.find(c => c.Id == id);
             if (exist.Name == "未分類"){
                 swal.fire({
                     icon: 'warning',
@@ -177,8 +185,6 @@
                 return;
             }
             
-            let existDetails = [];
-            
             swal.fire({
                 icon: 'warning',
                 text: '卡片刪除後底下的明細也會自動刪除',
@@ -187,39 +193,23 @@
                 cancelButtonText: '取消'
             }).then(res => {
                 if (res.isConfirmed){
+                    this.cards.is.deleting = true;
                     axios({
-                        method: 'get',
-                        url: `./api/detail/list/${guid}`
+                        method: 'delete',
+                        url: `./api/card`,
+                        data: exist
                     }).then(res => {
-                        existDetails = res.data.Details;
-                        existDetails.forEach(item => {
-                            axios({
-                                method: 'delete',
-                                url: `./api/detail/item/${item.Guid}`
-                            }).then(res => {
-                                console.log(`delete item: ${item.Name}`);
-                            }).catch(err => {
-                                apiFailed(err.response.status, `明細名稱 [${item.Name}] 刪除失敗`);
-                                console.log(err)
-                            })
-                        });
-                        axios({
-                            method: 'delete',
-                            url: `./api/card/${guid}`
-                        }).then(res => {
-                            this.cards.list.data = res.data;
-                            swal.fire({
-                                icon: 'success',
-                                text: '刪除成功',
-                                showConfirmButton: false,
-                                timer: 1500
-                            })
-                        }).catch(err => {
-                            apiFailed(err.response.status, err.response.data.Message);
+                        this.cards.list.data = res.data;
+                        swal.fire({
+                            icon: 'success',
+                            text: '刪除成功',
+                            showConfirmButton: false,
+                            timer: 1500
                         })
                     }).catch(err => {
-                        apiFailed(err.response.status, `卡片名稱 [${exist.Name}] 的明細取得失敗`);
-                        console.log(err)
+                        apiFailed(err.response.status, err.response.data.Message);
+                    }).then(() => {
+                        this.cards.is.deleting = false;
                     })
                 }
             })            
@@ -235,7 +225,9 @@
                 });
                 return;
             }
-            
+
+            this.cards.list.edit.userId = this.user.info.id;
+            this.cards.is.updating = true;
             axios({
                 method: 'put',
                 url: './api/card',
@@ -247,15 +239,20 @@
                     showConfirmButton: false,
                     timer: 2000,
                 })
+                this.getCards();
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
+            }).then(() => {
+                this.cards.is.updating = false;
             })
         },
         setCardEditPage: function (card) {
             let vm = this;
-            vm.cards.list.edit.guid = card.Guid;
+            vm.cards.list.edit.id = card.Id;
             vm.cards.list.edit.name = card.Name;
+            vm.cards.list.edit.createTime = card.CreateTime;
         },
+        // about details
         getDetails: function (guid) {
             let vm = this;
 
@@ -357,6 +354,7 @@
             
             vm.cards.item.edit.cardGuid = item.CardGuid;
         },
+        // others
         backToHome: function () {
             let vm = this;
 
@@ -388,7 +386,9 @@
 
     },
     mounted: function () {
-        // this.getCards();
+        if (localStorage.length !== 0){
+            this.getSession();
+        }
     }
 });
 app.mount('#app')
