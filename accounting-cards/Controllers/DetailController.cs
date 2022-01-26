@@ -80,120 +80,119 @@ namespace accounting_cards.Controllers
                 .Collection("users").Document(userId)
                 .Collection("cards").Document(cardId)
                 .Collection("details").GetSnapshotAsync();
-            
+
+            var details = new List<UserCardDetail>();
             foreach (var result in results)
             {
-                var card = result.ConvertTo<UserCard>();
-                
+                var detail = result.ConvertTo<UserCardDetail>();
+                details.Add(detail);
             }
             
-            return Ok();
+            return Ok(details);
         }
         
         [HttpPost]
         [Route("item")]
-        public IHttpActionResult Add(Detail newDetail)
+        public async Task<IHttpActionResult> Add(UserCardDetail newDetail)
         {
-            var cards = JsonConvert.DeserializeObject<List<Card>>(_cache["cards"].ToString());
-            var card = cards.FirstOrDefault(c => c.Guid == newDetail.CardGuid);
-            if (card == null)
+            var document = _db
+                .Collection("users").Document(newDetail.UserId)
+                .Collection("cards").Document(newDetail.CardId)
+                .Collection("details").Document();
+            
+            newDetail.Id = document.Id;
+            await document.CreateAsync(newDetail);
+            
+            var results = await _db
+                .Collection("users").Document(newDetail.UserId)
+                .Collection("cards").Document(newDetail.CardId)
+                .Collection("details").GetSnapshotAsync();
+            
+            var details = new List<UserCardDetail>();
+            foreach (var result in results)
             {
-                return BadRequest("卡片分類不存在");
+                var detail = result.ConvertTo<UserCardDetail>();
+                details.Add(detail);
             }
             
-            newDetail.Guid = Guid.NewGuid();
-
-            if (card.Name == "未分類")
-            {
-                _defaultDetail.Add(newDetail);
-                return Ok(_defaultDetail);
-            }
-            else
-            {
-                _foodDetails.Add(newDetail);
-                return Ok(_foodDetails);
-            }
+            return Ok(details);
         }
 
         [HttpDelete]
-        [Route("item/{guid}")]
-        public IHttpActionResult Delete(Guid guid)
+        [Route("item")]
+        public async Task<IHttpActionResult> Delete(UserCardDetail deleteDetail)
         {
-            var defaultDetail = _defaultDetail.FirstOrDefault(d => d.Guid == guid);
-            var foodDetail = _foodDetails.FirstOrDefault(d => d.Guid == guid);
-
-            if (defaultDetail != null)
+            await _db
+                .Collection("users").Document(deleteDetail.UserId)
+                .Collection("cards").Document(deleteDetail.CardId)
+                .Collection("details").Document(deleteDetail.Id)
+                .DeleteAsync();
+            
+            var results = await _db
+                .Collection("users").Document(deleteDetail.UserId)
+                .Collection("cards").Document(deleteDetail.CardId)
+                .Collection("details").GetSnapshotAsync();
+            
+            var details = new List<UserCardDetail>();
+            foreach (var result in results)
             {
-                _defaultDetail.Remove(defaultDetail);
-                return Ok(_defaultDetail);
-            }
-
-            if (_foodDetails != null)
-            {
-                _foodDetails.Remove(foodDetail);
-                return Ok(_foodDetails);
+                var detail = result.ConvertTo<UserCardDetail>();
+                details.Add(detail);
             }
             
-            return BadRequest("查無此筆明細");
+            return Ok(details);
         }
 
         [HttpPut]
         [Route("item")]
-        public IHttpActionResult Update(Detail detail)
+        public async Task<IHttpActionResult> Update(UserCardDetail updateDetail, string oldCardId)
         {
-            var defaultDetail = _defaultDetail.FirstOrDefault(d => d.Guid == detail.Guid);
-            var foodDetail = _foodDetails.FirstOrDefault(d => d.Guid == detail.Guid);
+            await _db
+                .Collection("users").Document(updateDetail.UserId)
+                .Collection("cards").Document(oldCardId)
+                .Collection("details").Document(updateDetail.Id).DeleteAsync();
+
+            await _db
+                .Collection("users").Document(updateDetail.UserId)
+                .Collection("cards").Document(updateDetail.CardId)
+                .Collection("details").Document(updateDetail.Id).CreateAsync(updateDetail);
             
-            if (defaultDetail != null)
+            var results = await _db
+                .Collection("users").Document(updateDetail.UserId)
+                .Collection("cards").Document(updateDetail.CardId)
+                .Collection("details").GetSnapshotAsync();
+            
+            var details = new List<UserCardDetail>();
+            foreach (var result in results)
             {
-                if (defaultDetail.CardGuid != detail.CardGuid)
-                {
-                    _defaultDetail.Remove(defaultDetail);
-                    _foodDetails.Add(new Detail
-                    {
-                        Name = detail.Name,
-                        Count = detail.Count,
-                        Date = detail.Date,
-                        CardGuid = detail.CardGuid
-                    });
-                }
-                else
-                {
-                    defaultDetail.Name = detail.Name;
-                    defaultDetail.Count = detail.Count;
-                    defaultDetail.Date = detail.Date;
-                    defaultDetail.CardGuid = detail.CardGuid;
-                }
-
-                return Ok(_defaultDetail);
-            }
-
-            if (_foodDetails != null)
-            {
-                if (foodDetail.CardGuid != detail.CardGuid)
-                {
-                    _foodDetails.Remove(foodDetail);
-                    _defaultDetail.Add(new Detail()
-                    {
-                        Name = detail.Name,
-                        Count = detail.Count,
-                        Date = detail.Date,
-                        CardGuid = detail.CardGuid
-                    });
-                }
-                else
-                {
-                    foodDetail.Name = detail.Name;
-                    foodDetail.Count = detail.Count;
-                    foodDetail.Date = detail.Date;
-                    foodDetail.CardGuid = detail.CardGuid;
-                }
-
-                return Ok(_foodDetails);
+                var detail = result.ConvertTo<UserCardDetail>();
+                details.Add(detail);
             }
             
-            return BadRequest("查無此筆明細");
+            return Ok(details);
         }
+    }
+
+    [FirestoreData]
+    public class UserCardDetail
+    {
+        [FirestoreProperty]
+        public string Id { get; set; }
+        
+        [FirestoreProperty]
+        public string CardId { get; set; }
+        
+        [FirestoreProperty]
+        public string UserId { get; set; }
+        
+        [FirestoreProperty]
+        public string Name { get; set; }
+        
+        [FirestoreProperty]
+        public int Count { get; set; }
+        
+        [FirestoreProperty]
+        public DateTimeOffset CreateTime { get; set; }
     }
 
     public class DetailList

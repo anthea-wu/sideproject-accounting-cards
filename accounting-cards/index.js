@@ -19,21 +19,24 @@
                     data:{},
                     card:{},
                     hidden: true,
+                    oldCardId: '',
                     add:{
-                        cardGuid: '',
+                        userId: '',
+                        cardId: '',
                         name: '',
                         day: new Date().toJSON().substring(0,10),
                         time: '00:00',
                         count: 0,
-                        date: ''
+                        createTime: ''
                     },
                     edit:{
-                        cardGuid: '',
+                        userId: '',
+                        cardId: '',
                         name: '',
                         day: new Date().toJSON().substring(0,10),
                         time: '00:00',
                         count: 0,
-                        date: ''
+                        createTime: ''
                     }
                 },
                 is: {
@@ -253,23 +256,19 @@
             vm.cards.list.edit.createTime = card.CreateTime;
         },
         // about details
-        getDetails: function (guid) {
-            let vm = this;
-
+        getDetails: function (id) {
             axios({
                 method: 'get',
-                url: `./api/detail/list/${guid}`
+                url: `./api/detail/${this.user.info.id}/${id}`
             }).then(res => {
-                vm.cards.item.details = res.data.Details;
-                vm.cards.item.add.cardGuid = res.data.CardGuid;
+                this.cards.item.details = res.data;
+                this.cards.item.add.cardId = id;
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             })
         },
         addDetail: function () {
-            let vm = this;
-
-            if (vm.cards.item.add.name === '' || vm.cards.item.add.time.trim() === ''){
+            if (this.cards.item.add.name === '' || this.cards.item.add.time.trim() === ''){
                 Swal.fire({
                     icon: 'error',
                     text: '明細內容不得留空',
@@ -279,7 +278,7 @@
                 return;
             }
 
-            if (vm.cards.item.add.count <= 0){
+            if (this.cards.item.add.count <= 0){
                 Swal.fire({
                     icon: 'error',
                     text: '明細金額不得小於等於0',
@@ -289,70 +288,68 @@
                 return;
             }
 
-            vm.cards.item.add.date = `${vm.cards.item.add.day} ${vm.cards.item.add.time}`;
-
+            this.cards.item.add.createTime = `${this.cards.item.add.day}T${this.cards.item.add.time}:00+00:00`;
+            this.cards.item.add.userId = this.user.info.id;
+            this.cards.item.add.cardId = this.cards.item.card.Id;
+            
             axios({
                 method: 'post',
                 url: `./api/detail/item`,
-                data: vm.cards.item.add
+                data: this.cards.item.add
             }).then(res => {
-                vm.cards.item.data = res.data;
+                this.cards.item.data = res.data;
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
-                vm.cards.item.add.name = '';
-                vm.cards.item.add.day = new Date().toJSON().substring(0,10);
-                vm.cards.item.add.time = '00:00';
-                vm.cards.item.add.count = 0;
-                vm.cards.item.add.date = '';
-                
-                this.getDetails(this.cards.item.card.Guid);
+                this.cards.item.add.name = '';
+                this.cards.item.add.day = new Date().toJSON().substring(0,10);
+                this.cards.item.add.time = '00:00';
+                this.cards.item.add.count = 0;
+                this.cards.item.add.date = '';
+
+                this.getDetails(this.cards.item.card.Id);
             })
         },
-        deleteDetail: function (guid) {
-            let vm = this;
-
+        deleteDetail: function (exist) {
             axios({
                 method: 'delete',
-                url: `./api/detail/item/${guid}`
+                url: `./api/detail/item`,
+                data: exist
             }).then(res => {
-                vm.cards.item.data = res.data;
+                this.cards.item.data = res.data;
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
-                this.getDetails(this.cards.item.card.Guid);
+                this.getDetails(this.cards.item.card.Id);
             })
         },
         updateDetail: function () {
-            let vm = this;
-
-            vm.cards.item.edit.date = `${vm.cards.item.edit.day} ${vm.cards.item.edit.time}`;
+            this.cards.item.edit.createTime = `${this.cards.item.edit.day} ${this.cards.item.edit.time}`;
+            this.cards.item.edit.userId = this.user.info.id;
             
             axios({
                 method: 'put',
-                url: `./api/detail/item`,
-                data: vm.cards.item.edit
+                url: `./api/detail/item?oldCardId=${this.cards.item.oldCardId}`,
+                data: this.cards.item.edit
             }).then(res => {
-                vm.cards.item.data = res.data;
+                this.cards.item.data = res.data;
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
-                this.getDetails(this.cards.item.card.Guid);
+                this.getDetails(this.cards.item.card.Id);
             })
         },
         setDetailEditPage: function (item) {
-            let vm = this;
+            console.log(item);
+            this.cards.item.edit.cardId = item.CardId;
+            this.cards.item.oldCardId = item.CardId;
+            this.cards.item.edit.id = item.Id;
+            this.cards.item.edit.name = item.Name;
+            this.cards.item.edit.count = item.Count;
             
-            vm.cards.item.edit.cardGuid = item.CardGuid;
-            vm.cards.item.edit.guid = item.Guid;
-            vm.cards.item.edit.name = item.Name;
-            vm.cards.item.edit.count = item.Count;
-            
-            let formatDate = vm.formatDate(item.Date);
-            vm.cards.item.edit.day = formatDate.split(' ')[0];
-            vm.cards.item.edit.time = formatDate.split(' ')[1];
-            
-            vm.cards.item.edit.cardGuid = item.CardGuid;
+            let formatDate = this.formatDate(item.CreateTime);
+            this.cards.item.edit.day = formatDate.split(' ')[0];
+            this.cards.item.edit.time = formatDate.split(' ')[1];
         },
         // others
         backToHome: function () {
@@ -365,7 +362,7 @@
             vm.cards.item.add.day = new Date().toJSON().substring(0,10);
             vm.cards.item.add.time = '00:00';
             vm.cards.item.add.count = 0;
-            vm.cards.item.add.date = '';
+            vm.cards.item.add.createTime = '';
         },
         formatDate: function (date) {
             return `${date.split('T')[0]} ${date.split('T')[1].split('+')[0]}`

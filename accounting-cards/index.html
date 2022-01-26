@@ -97,8 +97,8 @@
             <div class="col-12">
                 <h1>{{cards.item.card.Name}}</h1>
             </div>
-            <div class="col-12">
-                <table class="table table-borderless table-hover align-middle">
+            <div class="col-12 mt-2">
+                <table class="table table-borderless table-hover table-lg align-middle">
                     <thead>
                     <tr>
                         <th scope="col">明細</th>
@@ -110,10 +110,10 @@
                     <tbody>
                     <tr v-for="item in cards.item.details">
                         <td>{{item.Name}}</td>
-                        <td>{{formatDate(item.Date)}}</td>
+                        <td>{{formatDate(item.CreateTime)}}</td>
                         <td>${{item.Count}}</td>
                         <td class="d-flex justify-content-evenly">
-                            <button type="button" class="btn btn-sm btn-outline-danger" @click.prevent="deleteDetail(item.Guid); getDetails(cards.item.card.Guid);">刪除</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" @click.prevent="deleteDetail(item); getDetails(cards.item.card.Id);">刪除</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailEditModal" @click="setDetailEditPage(item)">編輯</button>
                         </td>
                     </tr>
@@ -199,8 +199,8 @@
                     <div class="modal-body">
                         <div class="mb-3 input-group">
                             <label class="input-group-text">卡片分類</label>
-                            <select class="form-select" v-model="cards.item.edit.cardGuid">
-                                <option v-for="card in cards.list.data" :value="card.Guid">{{card.Name}}</option>
+                            <select class="form-select" v-model="cards.item.edit.cardId">
+                                <option v-for="card in cards.list.data" :value="card.Id">{{card.Name}}</option>
                             </select>
                         </div>
                         <div class="mb-3 input-group">
@@ -222,7 +222,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal" @click="updateDetail(); getDetails(cards.item.card.Guid);">儲存</button>
+                        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal" @click="updateDetail(); getDetails(cards.item.card.Id);">儲存</button>
                     </div>
                 </div>
             </div>
