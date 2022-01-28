@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using accounting_cards.Models;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
 
@@ -27,7 +27,7 @@ namespace accounting_cards.Controllers
                 return BadRequest($"找不到ID為 {id} 的使用者");
             }
 
-            var user = result.ConvertTo<UserInfo>();
+            var user = result.ConvertTo<User>();
             return Ok(user);
         }
 
@@ -40,7 +40,7 @@ namespace accounting_cards.Controllers
             var db = FirestoreDb.Create("accounting-cards", builder.Build());
 
             var document = db.Collection("users").Document();
-            var newUser = new UserInfo
+            var newUser = new User
             {
                 CreateTime = DateTimeOffset.Now,
                 Id = document.Id
@@ -48,7 +48,7 @@ namespace accounting_cards.Controllers
             await document.SetAsync(newUser);
             
             var cards = db.Collection("users").Document(document.Id).Collection("cards").Document();
-            var defaultCard = new UserCard()
+            var defaultCard = new Card()
             {
                 Id = cards.Id,
                 Name = "未分類",
@@ -60,34 +60,5 @@ namespace accounting_cards.Controllers
             
             return Ok(newUser);
         }
-    }
-
-    [FirestoreData]
-    public class UserCard
-    {
-        [FirestoreProperty]
-        public string Id { get; set; }
-        
-        [FirestoreProperty]
-        public string Name { get; set; }
-        
-        [FirestoreProperty]
-        public int Total { get; set; }
-
-        [FirestoreProperty]
-        public string UserId { get; set; }
-        
-        [FirestoreProperty]
-        public DateTimeOffset CreateTime { get; set; }
-    }
-
-    [FirestoreData]
-    public class UserInfo
-    {
-        [FirestoreProperty]
-        public DateTimeOffset CreateTime { get; set; }
-        
-        [FirestoreProperty]
-        public string Id { get; set; }
     }
 }
