@@ -29,6 +29,7 @@ namespace accounting_cards
             //     .InstancePerHttpRequest();
 
             // 註冊 Repository UnitOfWork
+            builder.Register(x => new DetailRepository()).As<IDetailRepository>().InstancePerRequest();
 
             // 註冊Services
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())

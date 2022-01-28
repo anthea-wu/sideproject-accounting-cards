@@ -1,119 +1,87 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using System.Web.Http;
 using accounting_cards.Models;
 using Google.Cloud.Firestore;
-using Google.Cloud.Firestore.V1;
 
 namespace accounting_cards.Controllers
 {
     [RoutePrefix("api/detail")]
     public class DetailController : ApiController
     {
-        private static readonly string _jsonPath = Properties.Settings.Default.FirebaseJsonPath;
-        static readonly string _jsonStr = File.ReadAllText(_jsonPath);
-        private static readonly FirestoreClientBuilder _builder = new FirestoreClientBuilder(){JsonCredentials = _jsonStr};
-        private readonly FirestoreDb _db = FirestoreDb.Create("accounting-cards", _builder.Build());
+        private readonly IDetailRepository _detailRepo;
+
+        public DetailController(IDetailRepository detailRepo)
+        {
+            _detailRepo = detailRepo;
+        }
 
         [HttpGet]
         [Route("{userId}/{cardId}")]
         public async Task<IHttpActionResult> List(string userId, string cardId)
         {
-            var results = await _db
-                .Collection("users").Document(userId)
-                .Collection("cards").Document(cardId)
-                .Collection("details").GetSnapshotAsync();
+            var results = await _detailRepo.Get(userId, cardId);
+            var details = GetReturnDetails(results);
 
-            var details = new List<Detail>();
-            foreach (var result in results)
-            {
-                var detail = result.ConvertTo<Detail>();
-                details.Add(detail);
-            }
-            
             return Ok(details);
         }
-        
+
         [HttpPost]
         [Route("item")]
         public async Task<IHttpActionResult> Add(Detail newDetail)
         {
-            var document = _db
-                .Collection("users").Document(newDetail.UserId)
-                .Collection("cards").Document(newDetail.CardId)
-                .Collection("details").Document();
+            await _detailRepo.Create(newDetail);
             
-            newDetail.Id = document.Id;
-            await document.CreateAsync(newDetail);
-            
-            var results = await _db
-                .Collection("users").Document(newDetail.UserId)
-                .Collection("cards").Document(newDetail.CardId)
-                .Collection("details").GetSnapshotAsync();
-            
-            var details = new List<Detail>();
-            foreach (var result in results)
-            {
-                var detail = result.ConvertTo<Detail>();
-                details.Add(detail);
-            }
-            
+            var results = await _detailRepo.Get(newDetail.UserId, newDetail.CardId);
+            var details = GetReturnDetails(results);
+
             return Ok(details);
         }
+
 
         [HttpDelete]
         [Route("item")]
         public async Task<IHttpActionResult> Delete(Detail deleteDetail)
         {
-            await _db
-                .Collection("users").Document(deleteDetail.UserId)
-                .Collection("cards").Document(deleteDetail.CardId)
-                .Collection("details").Document(deleteDetail.Id)
-                .DeleteAsync();
+            await _detailRepo.Delete(deleteDetail);
             
-            var results = await _db
-                .Collection("users").Document(deleteDetail.UserId)
-                .Collection("cards").Document(deleteDetail.CardId)
-                .Collection("details").GetSnapshotAsync();
-            
-            var details = new List<Detail>();
-            foreach (var result in results)
-            {
-                var detail = result.ConvertTo<Detail>();
-                details.Add(detail);
-            }
+            var results = await _detailRepo.Get(deleteDetail.UserId, deleteDetail.CardId);
+            var details = GetReturnDetails(results);
             
             return Ok(details);
         }
+
 
         [HttpPut]
         [Route("item")]
         public async Task<IHttpActionResult> Update(Detail updateDetail, string oldCardId)
         {
-            await _db
-                .Collection("users").Document(updateDetail.UserId)
-                .Collection("cards").Document(oldCardId)
-                .Collection("details").Document(updateDetail.Id).DeleteAsync();
+            var deleteDetail = new Detail()
+            {
+                UserId = updateDetail.UserId,
+                CardId = oldCardId,
+                Id = updateDetail.Id
+            };
+            
+            await _detailRepo.Delete(deleteDetail);
+            await _detailRepo.Create(updateDetail);
+            
+            var results = await _detailRepo.Get(deleteDetail.UserId, deleteDetail.CardId);
+            var details = GetReturnDetails(results);
 
-            await _db
-                .Collection("users").Document(updateDetail.UserId)
-                .Collection("cards").Document(updateDetail.CardId)
-                .Collection("details").Document(updateDetail.Id).CreateAsync(updateDetail);
-            
-            var results = await _db
-                .Collection("users").Document(updateDetail.UserId)
-                .Collection("cards").Document(updateDetail.CardId)
-                .Collection("details").GetSnapshotAsync();
-            
+            return Ok(details);
+        }
+
+        private static List<Detail> GetReturnDetails(QuerySnapshot results)
+        {
             var details = new List<Detail>();
             foreach (var result in results)
             {
                 var detail = result.ConvertTo<Detail>();
                 details.Add(detail);
             }
-            
-            return Ok(details);
+
+            return details;
         }
     }
 }

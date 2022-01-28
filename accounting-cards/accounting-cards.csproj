@@ -245,6 +245,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\IDetailRepository.cs" />
     <Compile Include="Models\CardModel.cs" />
     <Compile Include="Models\DetailModel.cs" />
     <Compile Include="Models\UserModel.cs" />
@@ -254,6 +255,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Repositories\DetailRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="all.js" />
@@ -277,8 +279,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Interfaces" />
-    <Folder Include="Repositories" />
     <Folder Include="Services" />
   </ItemGroup>
   <PropertyGroup>
