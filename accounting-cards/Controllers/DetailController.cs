@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -19,58 +18,6 @@ namespace accounting_cards.Controllers
         static readonly string _jsonStr = File.ReadAllText(_jsonPath);
         private static readonly FirestoreClientBuilder _builder = new FirestoreClientBuilder(){JsonCredentials = _jsonStr};
         private readonly FirestoreDb _db = FirestoreDb.Create("accounting-cards", _builder.Build());
-        
-        private static readonly List<Detail> _defaultDetail = new List<Detail>()
-        {
-            new Detail()
-            {
-                Guid = Guid.NewGuid(),
-                Name = "範例",
-                Count = 0,
-                Date = new DateTimeOffset(2022, 1, 4, 08, 45, 00, TimeSpan.Zero)
-            },
-            new Detail()
-            {
-                Guid = Guid.NewGuid(),
-                Name = "範例",
-                Count = 100,
-                Date = new DateTimeOffset(2022, 1, 4, 08, 53, 00, TimeSpan.Zero)
-            },
-            new Detail()
-            {
-                Guid = Guid.NewGuid(),
-                Name = "未分類",
-                Count = 50,
-                Date = new DateTimeOffset(new DateTime(2022, 1, 5, 12, 05, 30))
-            }
-        };
-
-        private static readonly List<Detail> _foodDetails = new List<Detail>()
-        {
-            new Detail()
-            {
-                Guid = Guid.NewGuid(),
-                Name = "範例",
-                Count = 0,
-                Date = new DateTimeOffset(2022, 1, 4, 08, 45, 00, TimeSpan.Zero)
-            },
-            new Detail()
-            {
-                Guid = Guid.NewGuid(),
-                Name = "範例",
-                Count = 100,
-                Date = new DateTimeOffset(2022, 1, 4, 08, 53, 00, TimeSpan.Zero)
-            },
-            new Detail()
-            {
-                Guid = Guid.NewGuid(),
-                Name = "飲食",
-                Count = 50,
-                Date = new DateTimeOffset(new DateTime(2022, 1, 5, 12, 05, 30))
-            }
-        };
-
-        private readonly MemoryCache _cache = MemoryCache.Default;
 
         [HttpGet]
         [Route("{userId}/{cardId}")]
