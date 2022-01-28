@@ -14,6 +14,7 @@ namespace accounting_cards
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
+            AutofacConfig.Register();
             GlobalConfiguration.Configure(WebConfig.Register);
         }
     }
