@@ -1,37 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using System.Web.Http;
 using accounting_cards.Models;
-using Google.Cloud.Firestore;
-using Google.Cloud.Firestore.V1;
 
 namespace accounting_cards.Controllers
 {
     [RoutePrefix("api/card")]
     public class CardController : ApiController
     {
-        private static readonly string _jsonPath = Properties.Settings.Default.FirebaseJsonPath;
-        static readonly string _jsonStr = File.ReadAllText(_jsonPath);
-        private static readonly FirestoreClientBuilder _builder = new FirestoreClientBuilder(){JsonCredentials = _jsonStr};
-        private readonly FirestoreDb _db = FirestoreDb.Create("accounting-cards", _builder.Build());
+        private readonly ICardRepository _cardRepo;
+        private readonly IDataService _dataService;
+
+        public CardController(ICardRepository cardRepo, IDataService dataService)
+        {
+            _cardRepo = cardRepo;
+            _dataService = dataService;
+        }
 
         [HttpGet]
         [Route("{id}/list")]
         public async Task<IHttpActionResult> List(string id)
         {
-            var cards = new List<Card>();
+            var results = await _cardRepo.GetList(id);
+            var cards = _dataService.GetReturnCardsOrderByCreateTime(results);
             
-            var results = await _db
-                .Collection("users").Document(id)
-                .Collection("cards").OrderBy("CreateTime")
-                .GetSnapshotAsync();
-            foreach (var result in results)
-            {
-                var card = result.ConvertTo<Card>();
-                cards.Add(card);
-            }
             return Ok(cards);
         }
 
@@ -39,10 +31,7 @@ namespace accounting_cards.Controllers
         [Route("{userId}/{cardId}")]
         public async Task<IHttpActionResult> Item(string userId, string cardId)
         {
-            var result =  await _db
-                .Collection("users").Document(userId)
-                .Collection("cards").Document(cardId)
-                .GetSnapshotAsync();
+            var result =  await _cardRepo.GetCard(userId, cardId);
 
             var card = result.ConvertTo<Card>();
 
@@ -52,64 +41,36 @@ namespace accounting_cards.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> Add(Card newCard)
         {
-            var cardCollection = _db.Collection("users").Document(newCard.UserId).Collection("cards").Document();
+            var cardCollection = _cardRepo.CreateNewCard(newCard);
             newCard.Id = cardCollection.Id;
             newCard.CreateTime = DateTimeOffset.Now;
-            await cardCollection.SetAsync(newCard);
+            await _cardRepo.UpdateCard(newCard, cardCollection);
             
-            var results =  await _db
-                .Collection("users").Document(newCard.UserId)
-                .Collection("cards").OrderBy("CreateTime")
-                .GetSnapshotAsync();
-
-            var cards = new List<Card>();
-            foreach (var result in results)
-            {
-                var card = result.ConvertTo<Card>();
-                cards.Add(card);
-            }
+            var results = await _cardRepo.GetList(newCard.UserId);
+            var cards = _dataService.GetReturnCardsOrderByCreateTime(results);
+            
             return Ok(cards);
         }
 
         [HttpDelete]
         public async Task<IHttpActionResult> Delete(Card deleteCard)
         {
-            await _db
-                .Collection("users").Document(deleteCard.UserId)
-                .Collection("cards").Document(deleteCard.Id).DeleteAsync();
+            await _cardRepo.DeleteCard(deleteCard);
             
-            var results =  await _db
-                .Collection("users").Document(deleteCard.UserId)
-                .Collection("cards").OrderBy("CreateTime")
-                .GetSnapshotAsync();
+            var results = await _cardRepo.GetList(deleteCard.UserId);
+            var cards = _dataService.GetReturnCardsOrderByCreateTime(results);
 
-            var cards = new List<Card>();
-            foreach (var result in results)
-            {
-                var card = result.ConvertTo<Card>();
-                cards.Add(card);
-            }
             return Ok(cards);
         }
-
+        
         [HttpPut]
         public async Task<IHttpActionResult> Update(Card updateCard)
         {
-            await _db
-                .Collection("users").Document(updateCard.UserId)
-                .Collection("cards").Document(updateCard.Id).SetAsync(updateCard);
+            await _cardRepo.UpdateCard(updateCard);
 
-            var results =  await _db
-                .Collection("users").Document(updateCard.UserId)
-                .Collection("cards").OrderBy("CreateTime")
-                .GetSnapshotAsync();
-
-            var cards = new List<Card>();
-            foreach (var result in results)
-            {
-                var card = result.ConvertTo<Card>();
-                cards.Add(card);
-            }
+            var results = await _cardRepo.GetList(updateCard.UserId);
+            var cards = _dataService.GetReturnCardsOrderByCreateTime(results);
+            
             return Ok(cards);
         }
     }

@@ -245,6 +245,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\ICardRepository.cs" />
+    <Compile Include="Interfaces\IDataService.cs" />
     <Compile Include="Interfaces\IDetailRepository.cs" />
     <Compile Include="Models\CardModel.cs" />
     <Compile Include="Models\DetailModel.cs" />
@@ -255,7 +257,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Repositories\CardRepository.cs" />
     <Compile Include="Repositories\DetailRepository.cs" />
+    <Compile Include="Services\DataService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="all.js" />
@@ -277,9 +281,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
