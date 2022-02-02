@@ -10,7 +10,7 @@ namespace accounting_cards
         Task<DocumentSnapshot> GetCard(string userId, string cardId);
         Task<WriteResult> UpdateCard(Card newCard, DocumentReference cardCollection);
         Task<WriteResult> UpdateCard(Card updateCard);
-        DocumentReference CreateNewCard(Card newCard);
+        DocumentReference CreateCard(string userId);
         Task<WriteResult> DeleteCard(Card deleteCard);
     }
 }

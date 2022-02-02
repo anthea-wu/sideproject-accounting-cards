@@ -31,6 +31,7 @@ namespace accounting_cards
             // 註冊 Repository UnitOfWork
             builder.Register(x => new DetailRepository()).As<IDetailRepository>().InstancePerRequest();
             builder.Register(x => new CardRepository()).As<ICardRepository>().InstancePerRequest();
+            builder.Register(x => new UserRepository()).As<IUserRepository>().InstancePerRequest();
             builder.Register(x => new DataService()).As<IDataService>().InstancePerRequest();
 
             // 註冊Services

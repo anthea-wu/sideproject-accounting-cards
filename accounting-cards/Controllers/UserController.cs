@@ -5,23 +5,27 @@ using System.Web.Http;
 using accounting_cards.Models;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
+using WriteResult = Google.Cloud.Firestore.WriteResult;
 
 namespace accounting_cards.Controllers
 {
     [RoutePrefix(("api/user"))]
     public class UserController : ApiController
     {
-        private readonly string _jsonPath = Properties.Settings.Default.FirebaseJsonPath;
-        
+        private readonly ICardRepository _cardRepo;
+        private readonly IUserRepository _userRepo;
+
+        public UserController(IUserRepository userRepo, ICardRepository cardRepo)
+        {
+            _userRepo = userRepo;
+            _cardRepo = cardRepo;
+        }
+
         [HttpGet]
         [Route("session/{id}")]
         public async Task<IHttpActionResult> Session(string id)
         {
-            var jsonString = File.ReadAllText(_jsonPath);
-            var builder = new FirestoreClientBuilder {JsonCredentials = jsonString};
-            var db = await FirestoreDb.CreateAsync("accounting-cards", await builder.BuildAsync());
-
-            var result = await db.Collection("users").Document(id).GetSnapshotAsync();
+            var result = await _userRepo.GetUser(id);
             if (!result.Exists)
             {
                 return BadRequest($"找不到ID為 {id} 的使用者");
@@ -35,19 +39,15 @@ namespace accounting_cards.Controllers
         [Route("new")]
         public async Task<IHttpActionResult> New()
         {
-            var jsonString = File.ReadAllText(_jsonPath);
-            var builder = new FirestoreClientBuilder {JsonCredentials = jsonString};
-            var db = FirestoreDb.Create("accounting-cards", builder.Build());
-
-            var document = db.Collection("users").Document();
+            var user = _userRepo.CreateUser();
             var newUser = new User
             {
                 CreateTime = DateTimeOffset.Now,
-                Id = document.Id
+                Id = user.Id
             };
-            await document.SetAsync(newUser);
-            
-            var cards = db.Collection("users").Document(document.Id).Collection("cards").Document();
+            await _userRepo.UpdateUser(user, newUser);
+
+            var cards = _cardRepo.CreateCard(user.Id);
             var defaultCard = new Card()
             {
                 Id = cards.Id,
@@ -56,9 +56,10 @@ namespace accounting_cards.Controllers
                 UserId = newUser.Id,
                 CreateTime = DateTimeOffset.Now
             };
-            await cards.SetAsync(defaultCard);
+            await _cardRepo.UpdateCard(defaultCard);
             
             return Ok(newUser);
         }
+
     }
 }

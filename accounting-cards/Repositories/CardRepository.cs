@@ -42,10 +42,10 @@ namespace accounting_cards
         }
 
 
-        public DocumentReference CreateNewCard(Card newCard)
+        public DocumentReference CreateCard(string userId)
         {
             return _db
-                .Collection("users").Document(newCard.UserId)
+                .Collection("users").Document(userId)
                 .Collection("cards").Document();
         }
         

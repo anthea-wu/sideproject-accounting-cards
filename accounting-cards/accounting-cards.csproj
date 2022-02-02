@@ -248,6 +248,7 @@
     <Compile Include="Interfaces\ICardRepository.cs" />
     <Compile Include="Interfaces\IDataService.cs" />
     <Compile Include="Interfaces\IDetailRepository.cs" />
+    <Compile Include="Interfaces\IUserRepository.cs" />
     <Compile Include="Models\CardModel.cs" />
     <Compile Include="Models\DetailModel.cs" />
     <Compile Include="Models\UserModel.cs" />
@@ -259,6 +260,7 @@
     </Compile>
     <Compile Include="Repositories\CardRepository.cs" />
     <Compile Include="Repositories\DetailRepository.cs" />
+    <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Services\DataService.cs" />
   </ItemGroup>
   <ItemGroup>

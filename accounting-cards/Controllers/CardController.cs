@@ -41,7 +41,7 @@ namespace accounting_cards.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> Add(Card newCard)
         {
-            var cardCollection = _cardRepo.CreateNewCard(newCard);
+            var cardCollection = _cardRepo.CreateCard(newCard.UserId);
             newCard.Id = cardCollection.Id;
             newCard.CreateTime = DateTimeOffset.Now;
             await _cardRepo.UpdateCard(newCard, cardCollection);
