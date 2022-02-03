@@ -21,8 +21,18 @@ namespace accounting_cards
                 .Collection("details").GetSnapshotAsync();
             return results;
         }
+
+        public async Task<DocumentSnapshot> Get(string userId, string cardId, string detailId)
+        {
+            var result = await _db
+                .Collection("users").Document(userId)
+                .Collection("cards").Document(cardId)
+                .Collection("details").Document(detailId)
+                .GetSnapshotAsync();
+            return result;
+        }
         
-        public async Task Create(Detail newDetail)
+        public async Task<string> Create(Detail newDetail)
         {
             var document = _db
                 .Collection("users").Document(newDetail.UserId)
@@ -31,6 +41,8 @@ namespace accounting_cards
 
             newDetail.Id = document.Id;
             await document.CreateAsync(newDetail);
+
+            return newDetail.Id;
         }
         
         public async Task Delete(Detail deleteDetail)

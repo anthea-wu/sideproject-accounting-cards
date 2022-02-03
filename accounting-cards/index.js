@@ -353,16 +353,16 @@
         },
         // others
         backToHome: function () {
-            let vm = this;
+            this.cards.list.hidden = false;
+            this.cards.item.hidden = true;
 
-            vm.cards.list.hidden = false;
-            vm.cards.item.hidden = true;
-
-            vm.cards.item.add.name = '';
-            vm.cards.item.add.day = new Date().toJSON().substring(0,10);
-            vm.cards.item.add.time = '00:00';
-            vm.cards.item.add.count = 0;
-            vm.cards.item.add.createTime = '';
+            this.cards.item.add.name = '';
+            this.cards.item.add.day = new Date().toJSON().substring(0,10);
+            this.cards.item.add.time = '00:00';
+            this.cards.item.add.count = 0;
+            this.cards.item.add.createTime = '';
+            
+            this.getCards();
         },
         formatDate: function (date) {
             return `${date.split('T')[0]} ${date.split('T')[1].split('+')[0]}`

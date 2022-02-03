@@ -32,7 +32,7 @@ namespace accounting_cards
             builder.Register(x => new DetailRepository()).As<IDetailRepository>().InstancePerRequest();
             builder.Register(x => new CardRepository()).As<ICardRepository>().InstancePerRequest();
             builder.Register(x => new UserRepository()).As<IUserRepository>().InstancePerRequest();
-            builder.Register(x => new DataService()).As<IDataService>().InstancePerRequest();
+            builder.Register(x => new DataService(new CardRepository(), new DetailRepository())).As<IDataService>().InstancePerRequest();
 
             // 註冊Services
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())

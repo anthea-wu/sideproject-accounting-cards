@@ -10,10 +10,14 @@ namespace accounting_cards.Controllers
     public class DetailController : ApiController
     {
         private readonly IDetailRepository _detailRepo;
+        private readonly ICardRepository _cardRepo;
+        private readonly IDataService _dataService;
 
-        public DetailController(IDetailRepository detailRepo)
+        public DetailController(IDetailRepository detailRepo, ICardRepository cardRepo, IDataService dataService)
         {
             _detailRepo = detailRepo;
+            _cardRepo = cardRepo;
+            _dataService = dataService;
         }
 
         [HttpGet]
@@ -30,8 +34,10 @@ namespace accounting_cards.Controllers
         [Route("item")]
         public async Task<IHttpActionResult> Add(Detail newDetail)
         {
-            await _detailRepo.Create(newDetail);
-            
+            newDetail.Id = await _detailRepo.Create(newDetail);
+
+            await _dataService.UpdateTotal(newDetail);
+
             var results = await _detailRepo.Get(newDetail.UserId, newDetail.CardId);
             var details = GetReturnDetails(results);
 
@@ -44,6 +50,8 @@ namespace accounting_cards.Controllers
         public async Task<IHttpActionResult> Delete(Detail deleteDetail)
         {
             await _detailRepo.Delete(deleteDetail);
+
+            _dataService.UpdateTotal(deleteDetail);
             
             var results = await _detailRepo.Get(deleteDetail.UserId, deleteDetail.CardId);
             var details = GetReturnDetails(results);
@@ -56,16 +64,16 @@ namespace accounting_cards.Controllers
         [Route("item")]
         public async Task<IHttpActionResult> Update(Detail updateDetail, string oldCardId)
         {
-            var deleteDetail = new Detail()
-            {
-                UserId = updateDetail.UserId,
-                CardId = oldCardId,
-                Id = updateDetail.Id
-            };
+            var deleteDetailDoc = await _detailRepo.Get(updateDetail.UserId, oldCardId, updateDetail.Id);
+            var deleteDetail = deleteDetailDoc.ConvertTo<Detail>();
+            deleteDetail.Count = -deleteDetail.Count;
             
             await _detailRepo.Delete(deleteDetail);
             await _detailRepo.Create(updateDetail);
             
+            _dataService.UpdateTotal(deleteDetail);
+            _dataService.UpdateTotal(updateDetail);
+
             var results = await _detailRepo.Get(deleteDetail.UserId, deleteDetail.CardId);
             var details = GetReturnDetails(results);
 
