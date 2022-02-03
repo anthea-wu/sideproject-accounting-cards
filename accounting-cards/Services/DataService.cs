@@ -37,7 +37,7 @@ namespace accounting_cards
             var card = cardDoc.ConvertTo<Card>();
             card.Total += detail.Count;
 
-            _cardRepo.UpdateCard(card);
+            await _cardRepo.UpdateCard(card);
         }
     }
 }

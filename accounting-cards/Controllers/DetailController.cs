@@ -51,7 +51,8 @@ namespace accounting_cards.Controllers
         {
             await _detailRepo.Delete(deleteDetail);
 
-            _dataService.UpdateTotal(deleteDetail);
+            deleteDetail.Count = -deleteDetail.Count;
+            await _dataService.UpdateTotal(deleteDetail);
             
             var results = await _detailRepo.Get(deleteDetail.UserId, deleteDetail.CardId);
             var details = GetReturnDetails(results);
@@ -71,12 +72,12 @@ namespace accounting_cards.Controllers
             await _detailRepo.Delete(deleteDetail);
             await _detailRepo.Create(updateDetail);
             
-            _dataService.UpdateTotal(deleteDetail);
-            _dataService.UpdateTotal(updateDetail);
+            await _dataService.UpdateTotal(deleteDetail);
+            await _dataService.UpdateTotal(updateDetail);
 
-            var results = await _detailRepo.Get(deleteDetail.UserId, deleteDetail.CardId);
+            var results = await _detailRepo.Get(updateDetail.UserId, deleteDetail.CardId);
             var details = GetReturnDetails(results);
-
+            
             return Ok(details);
         }
 
