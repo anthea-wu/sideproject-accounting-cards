@@ -36,7 +36,8 @@
                         day: new Date().toJSON().substring(0,10),
                         time: '00:00',
                         count: 0,
-                        createTime: ''
+                        createTime: '',
+                        dateString: ''
                     }
                 },
                 is: {
@@ -263,6 +264,7 @@
             }).then(res => {
                 this.cards.item.details = res.data;
                 this.cards.item.add.cardId = id;
+                this.cards.item.add.time = `${new Date().getHours()}:${new Date().getMinutes()}`
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             })
@@ -288,7 +290,7 @@
                 return;
             }
 
-            this.cards.item.add.createTime = `${this.cards.item.add.day}T${this.cards.item.add.time}:00+00:00`;
+            this.cards.item.add.createTime = `${this.cards.item.add.day}T${this.cards.item.add.time}+00:00`;
             this.cards.item.add.userId = this.user.info.id;
             this.cards.item.add.cardId = this.cards.item.card.Id;
             
@@ -324,7 +326,7 @@
             })
         },
         updateDetail: function () {
-            this.cards.item.edit.createTime = `${this.cards.item.edit.day} ${this.cards.item.edit.time}`;
+            this.cards.item.edit.createTime = `${this.cards.item.edit.day} ${this.cards.item.edit.time}+00:00`;
             this.cards.item.edit.userId = this.user.info.id;
             
             axios({
@@ -365,7 +367,8 @@
             this.getCards();
         },
         formatDate: function (date) {
-            return `${date.split('T')[0]} ${date.split('T')[1].split('+')[0]}`
+            let str = date.split('T')[1].split('+')[0];
+            return `${date.split('T')[0]} ${str.split(':')[0]}:${str.split(':')[1]}`
         },
         checkDuplicate: function (name) {
             let duplicate = false;
