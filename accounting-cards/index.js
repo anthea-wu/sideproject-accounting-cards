@@ -38,6 +38,10 @@
                         count: 0,
                         createTime: '',
                         dateString: ''
+                    },
+                    is: {
+                        adding: false,
+                        editing: false,
                     }
                 },
                 is: {
@@ -164,15 +168,19 @@
 
             this.cards.list.add.userId = this.user.info.id;
             this.cards.is.adding = true;
+            $('.loader-inner').removeClass('display-none');
+            
             axios({
                 method: 'post',
                 url: `./api/card`,
                 data: this.cards.list.add
             }).then(res => {
                 this.cards.list.data = res.data;
+                apiSuccess('新增成功');
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
+                $('.loader-inner').addClass('display-none');
                 this.cards.is.adding = false;
                 this.cards.list.add.name = '';
             })
@@ -198,21 +206,19 @@
             }).then(res => {
                 if (res.isConfirmed){
                     this.cards.is.deleting = true;
+                    $('.loader-inner').removeClass('display-none');
+                    
                     axios({
                         method: 'delete',
                         url: `./api/card`,
                         data: exist
                     }).then(res => {
                         this.cards.list.data = res.data;
-                        swal.fire({
-                            icon: 'success',
-                            text: '刪除成功',
-                            showConfirmButton: false,
-                            timer: 1500
-                        })
+                        apiSuccess('刪除成功');
                     }).catch(err => {
                         apiFailed(err.response.status, err.response.data.Message);
                     }).then(() => {
+                        $('.loader-inner').addClass('display-none');
                         this.cards.is.deleting = false;
                     })
                 }
@@ -232,21 +238,19 @@
 
             this.cards.list.edit.userId = this.user.info.id;
             this.cards.is.updating = true;
+            $('.loader-inner').removeClass('display-none');
+            
             axios({
                 method: 'put',
                 url: './api/card',
                 data: this.cards.list.edit
             }).then(res => {
-                swal.fire({
-                    icon: 'success',
-                    text: '卡片更新成功',
-                    showConfirmButton: false,
-                    timer: 2000,
-                })
+                apiSuccess('更新成功');
                 this.getCards();
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
+                $('.loader-inner').addClass('display-none');
                 this.cards.is.updating = false;
             })
         },
@@ -290,6 +294,8 @@
                 return;
             }
 
+            this.cards.item.adding = true;
+            $('.loader-inner').removeClass('display-none');
             this.cards.item.add.createTime = `${this.cards.item.add.day}T${this.cards.item.add.time}+00:00`;
             this.cards.item.add.userId = this.user.info.id;
             this.cards.item.add.cardId = this.cards.item.card.Id;
@@ -300,6 +306,7 @@
                 data: this.cards.item.add
             }).then(res => {
                 this.cards.item.data = res.data;
+                apiSuccess('新增成功');
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
@@ -309,23 +316,53 @@
                 this.cards.item.add.count = 0;
                 this.cards.item.add.date = '';
 
+                $('.loader-inner').addClass('display-none');
+                this.cards.item.adding = false;
                 this.getDetails(this.cards.item.card.Id);
             })
         },
         deleteDetail: function (exist) {
+            this.cards.item.editing = true;
+            $('.loader-inner').removeClass('display-none');
+            
             axios({
                 method: 'delete',
                 url: `./api/detail/item`,
                 data: exist
             }).then(res => {
                 this.cards.item.data = res.data;
+                apiSuccess('刪除成功');
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
+                this.cards.item.editing = false;
+                $('.loader-inner').addClass('display-none');
                 this.getDetails(this.cards.item.card.Id);
             })
         },
         updateDetail: function () {
+            if (this.cards.item.edit.name === '' || this.cards.item.edit.time.trim() === ''){
+                Swal.fire({
+                    icon: 'error',
+                    text: '明細內容不得留空',
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
+                return;
+            }
+
+            if (this.cards.item.edit.count <= 0){
+                Swal.fire({
+                    icon: 'error',
+                    text: '明細金額不得小於等於0',
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
+                return;
+            }
+            
+            this.cards.item.editing = true;
+            $('.loader-inner').removeClass('display-none');
             this.cards.item.edit.createTime = `${this.cards.item.edit.day} ${this.cards.item.edit.time}+00:00`;
             this.cards.item.edit.userId = this.user.info.id;
             
@@ -335,9 +372,12 @@
                 data: this.cards.item.edit
             }).then(res => {
                 this.cards.item.data = res.data;
+                apiSuccess('更新成功');
             }).catch(err => {
                 apiFailed(err.response.status, err.response.data.Message);
             }).then(() => {
+                $('.loader-inner').addClass('display-none');
+                this.cards.item.editing = false;
                 this.getDetails(this.cards.item.card.Id);
             })
         },
@@ -386,6 +426,7 @@
 
     },
     mounted: function () {
+        $(".loader-inner").loaders();
         if (localStorage.length !== 0){
             this.getSession();
         }

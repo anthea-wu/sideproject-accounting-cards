@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using accounting_cards.Models;
@@ -89,6 +90,8 @@ namespace accounting_cards.Controllers
                 var detail = result.ConvertTo<Detail>();
                 details.Add(detail);
             }
+
+            details = details.OrderByDescending(d => d.CreateTime).ToList();
 
             return details;
         }
