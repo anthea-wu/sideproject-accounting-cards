@@ -113,6 +113,16 @@
                 })
             }
         },
+        getId: function () {
+            const el = document.createElement('textarea');
+            el.value = this.user.info.id;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            $('.toast').toast('show');
+        },
         // abount cards
         getCards: function () {
             axios({

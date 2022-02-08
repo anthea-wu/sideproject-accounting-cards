@@ -264,6 +264,7 @@
     <Compile Include="Services\DataService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="all.css" />
     <Content Include="all.js" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />

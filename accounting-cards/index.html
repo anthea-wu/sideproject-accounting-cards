@@ -10,20 +10,6 @@
     <link rel="stylesheet" type="text/css" href="node_modules/loaders.css/loaders.css"/>
     
     <style>
-        .ball-scale-multiple{
-            position: absolute;
-            top: calc(50% - 30px);
-            left: 50%;
-            z-index: 10;
-        }
-        
-        .ball-scale-multiple div{
-            background-color: #ed5565;
-        }
-        
-        .display-none{
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -50,14 +36,14 @@
                             <p class="mb-0 mt-3 fw-light text-muted" v-show="!user.info.error">請輸入ID登入，或是留空點擊下一步註冊</p>
                             <p class="mb-0 mt-3 fw-light text-danger" v-show="user.info.error">ID不存在，請留空註冊一組新的ID</p>
                         </div>
-                        <button class="btn btn-outline-secondary btn-sm float-end" @click.prevent="checkUser">下一步</button>
+                        <h5><button class="btn badge badge-topic btn-sm float-end" @click.prevent="checkUser">下一步</button></h5>
                     </div>
                     <div class="card-body" v-if="user.session.news">
                         <div>
                             <p class="mb-0 fw-bold text-danger">你的ID是：{{user.info.id}}</p>
                             <p class="mb-0 fw-light text-muted">請記住這個ID，遺失無法補發</p>
                         </div>
-                        <button class="btn btn-outline-secondary btn-sm float-end" @click.prevent="getCards">下一步</button>
+                        <h5><button class="btn badge badge-topic btn-sm float-end" @click.prevent="getCards">下一步</button></h5>
                     </div>
                 </div>
             </div>
@@ -65,11 +51,19 @@
         
         <!--首頁：卡片清單-->
         <div class="row" v-show="!cards.list.hidden">
-            <div class="col-12 my-4">
-                <h1>
-                    歡迎回來
-                    <small><span>查詢我的ID</span></small>
-                </h1>
+            <div class="col-12 my-4 d-flex align-items-end">
+                <h1 class="mb-0">歡迎回來</h1>
+                <h3 class="mb-0">
+                    <button type="button" class="mb-1 ms-3 btn badge badge-blue" @click="getId">查詢我的ID</button>
+                </h3>
+                <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            複製成功
+                        </div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
             </div>
             <div class="col-lg-3 col-md-4 col-sm-6 col-12 mt-2" v-for="card in cards.list.data">
                 <div class="card" @click.prevent="getCard(card.Id)">
@@ -79,8 +73,8 @@
                                 {{card.Name}}
                             </span>
                             <span>
-                                <button type="button" class="btn btn-sm btn-outline-danger me-2" @click.prevent.stop="deleteCard(card.Id)" :disabled="cards.is.deleting || cards.is.updating">刪除</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#cardEditModal" @click.prevent.stop="setCardEditPage(card)" :disabled="cards.is.updating || cards.is.deleting">編輯</button>
+                                <small><button type="button" class="btn btn-sm badge badge-red me-2" @click.prevent.stop="deleteCard(card.Id)" :disabled="cards.is.deleting || cards.is.updating">刪除</button></small>
+                                <small><button type="button" class="btn btn-sm badge badge-topic" data-bs-toggle="modal" data-bs-target="#cardEditModal" @click.prevent.stop="setCardEditPage(card)" :disabled="cards.is.updating || cards.is.deleting">編輯</button></small>
                             </span>
                         </h3>
                         <table class="table table-borderless table-sm">
@@ -132,8 +126,8 @@
                         <td>{{formatDate(item.CreateTime)}}</td>
                         <td>${{item.Count}}</td>
                         <td class="d-flex justify-content-evenly">
-                            <button type="button" class="btn btn-sm btn-outline-danger" @click.prevent="deleteDetail(item)" :disabled="cards.item.editing">刪除</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailEditModal" @click="setDetailEditPage(item)" :disabled="cards.item.editing">編輯</button>
+                            <h5 class="mb-0"><button type="button" class="btn btn-sm badge badge-red" @click.prevent="deleteDetail(item)" :disabled="cards.item.editing">刪除</button></h5>
+                            <h5 class="mb-0"><button type="button" class="btn btn-sm badge badge-topic" data-bs-toggle="modal" data-bs-target="#detailEditModal" @click="setDetailEditPage(item)" :disabled="cards.item.editing">編輯</button></h5>
                         </td>
                     </tr>
                     </tbody>
@@ -166,7 +160,7 @@
                             </div>
                         </td>
                         <td class="d-flex justify-content-evenly">
-                            <button type="button" class="btn btn-outline-primary" @click.prevent="addDetail" :disabled="cards.item.adding || cards.item.editing">新增</button>
+                            <h3 class="mb-0"><button type="button" class="btn badge badge-blue" @click.prevent="addDetail" :disabled="cards.item.adding || cards.item.editing">新增</button></h3>
                         </td>
                     </tr>
                     <tr>
@@ -200,8 +194,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal" @click="updateCard">儲存</button>
+                        <button type="button" class="btn badge badge-topic" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn badge badge-blue" data-bs-dismiss="modal" @click="updateCard">儲存</button>
                     </div>
                 </div>
             </div>
@@ -239,8 +233,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal" @click="updateDetail(); getDetails(cards.item.card.Id);">儲存</button>
+                        <h3 class="mb-0"><button type="button" class="btn badge badge-topic" data-bs-dismiss="modal">關閉</button></h3>
+                        <h3 class="mb-0"><button type="button" class="btn badge badge-blue" data-bs-dismiss="modal" @click="updateDetail(); getDetails(cards.item.card.Id);">儲存</button></h3>
                     </div>
                 </div>
             </div>
